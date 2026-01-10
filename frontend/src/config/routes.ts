@@ -1,10 +1,16 @@
 import type { RouteRecordRaw } from 'vue-router'
+import { ROLES, type Role } from '@config/roles'
+
+// Re-export ROLES for backward compatibility
+export { ROLES, type Role } from '@config/roles'
 
 // Public pages
 import HomePage from '@pages/public/HomePage.vue'
 import LoginPage from '@pages/public/LoginPage.vue'
 import RegisterPage from '@pages/public/RegisterPage.vue'
 import NotFoundPage from '@pages/public/NotFoundPage.vue'
+import ForbiddenPage from '@pages/public/ForbiddenPage.vue'
+import ErrorPage from '@pages/public/ErrorPage.vue'
 
 // Wine pages
 import WineSearchPage from '@pages/wines/WineSearchPage.vue'
@@ -30,9 +36,14 @@ import AdminEventsPage from '@pages/admin/AdminEventsPage.vue'
 import AdminRoutesPage from '@pages/admin/AdminRoutesPage.vue'
 import AdminUsersPage from '@pages/admin/AdminUsersPage.vue'
 
+
+/**
+ * Route meta interface for type safety
+ */
 export interface RouteMeta {
   requiresAuth?: boolean
-  roles?: string[]
+  roles?: Role[]
+  titleKey?: string
   title?: string
   guestOnly?: boolean
 }
@@ -40,135 +51,183 @@ export interface RouteMeta {
 declare module 'vue-router' {
   interface RouteMeta {
     requiresAuth?: boolean
-    roles?: string[]
+    roles?: Role[]
+    titleKey?: string
     title?: string
     guestOnly?: boolean
   }
 }
 
 export const routes: RouteRecordRaw[] = [
-  // Public routes
+  // ===== PUBLIC ROUTES =====
   {
     path: '/',
     name: 'home',
     component: HomePage,
-    meta: { title: 'Home' },
+    meta: { titleKey: 'nav.home' },
   },
   {
     path: '/login',
     name: 'login',
     component: LoginPage,
-    meta: { title: 'Login', guestOnly: true },
+    meta: { titleKey: 'auth.login', guestOnly: true },
   },
   {
     path: '/register',
     name: 'register',
     component: RegisterPage,
-    meta: { title: 'Register', guestOnly: true },
+    meta: { titleKey: 'auth.register', guestOnly: true },
   },
 
-  // Wine routes
+  // ===== ERROR PAGES =====
+  {
+    path: '/403',
+    name: 'forbidden',
+    component: ForbiddenPage,
+    meta: { titleKey: 'errors.forbidden' },
+  },
+  {
+    path: '/500',
+    name: 'error',
+    component: ErrorPage,
+    meta: { titleKey: 'errors.serverError' },
+  },
+
+  // ===== WINE ROUTES (Public browsing, some features require auth) =====
   {
     path: '/wines',
     name: 'wines',
     component: WineSearchPage,
-    meta: { title: 'Search Wines' },
-  },
-  {
-    path: '/wines/:id',
-    name: 'wine-details',
-    component: WineDetailsPage,
-    meta: { title: 'Wine Details' },
+    meta: { titleKey: 'wines.title' },
   },
   {
     path: '/wines/compare',
     name: 'wine-compare',
     component: WineComparePage,
-    meta: { title: 'Compare Wines' },
+    meta: { titleKey: 'wines.compare' },
   },
   {
     path: '/wines/scan',
     name: 'wine-scan',
     component: WineScanPage,
-    meta: { title: 'Scan Wine', requiresAuth: true },
+    meta: {
+      titleKey: 'wines.scan',
+      requiresAuth: true,
+      roles: [ROLES.USER, ROLES.PARTNER, ROLES.MODERATOR, ROLES.ADMIN],
+    },
+  },
+  {
+    path: '/wines/:id',
+    name: 'wine-details',
+    component: WineDetailsPage,
+    meta: { titleKey: 'wines.title' },
   },
 
-  // Cellar routes
+  // ===== CELLAR ROUTES (Requires authentication) =====
   {
     path: '/cellar',
     name: 'cellar',
     component: MyCellarPage,
-    meta: { title: 'My Cellar', requiresAuth: true },
+    meta: {
+      titleKey: 'cellar.title',
+      requiresAuth: true,
+      roles: [ROLES.USER, ROLES.PARTNER, ROLES.MODERATOR, ROLES.ADMIN],
+    },
   },
 
-  // Event routes
+  // ===== EVENT ROUTES (Public browsing) =====
   {
     path: '/events',
     name: 'events',
     component: EventsNearbyPage,
-    meta: { title: 'Events Nearby' },
+    meta: { titleKey: 'events.title' },
   },
   {
     path: '/events/:id',
     name: 'event-details',
     component: EventDetailsPage,
-    meta: { title: 'Event Details' },
+    meta: { titleKey: 'events.title' },
   },
 
-  // Wine route routes
+  // ===== WINE ROUTE ROUTES (Public browsing) =====
   {
     path: '/wine-routes',
     name: 'wine-routes',
     component: WineRoutesExplorerPage,
-    meta: { title: 'Wine Routes' },
+    meta: { titleKey: 'routes.title' },
   },
   {
     path: '/wine-routes/:id',
     name: 'wine-route-details',
     component: WineRouteDetailsPage,
-    meta: { title: 'Wine Route Details' },
+    meta: { titleKey: 'routes.title' },
   },
 
-  // Admin routes
+  // ===== ADMIN ROUTES (Requires ROLE_ADMIN or ROLE_MODERATOR) =====
   {
     path: '/admin',
     name: 'admin',
     component: AdminDashboardPage,
-    meta: { title: 'Admin Dashboard', requiresAuth: true, roles: ['admin'] },
+    meta: {
+      titleKey: 'nav.admin',
+      requiresAuth: true,
+      roles: [ROLES.ADMIN, ROLES.MODERATOR],
+    },
   },
   {
     path: '/admin/wines',
     name: 'admin-wines',
     component: AdminWinesPage,
-    meta: { title: 'Manage Wines', requiresAuth: true, roles: ['admin'] },
+    meta: {
+      titleKey: 'nav.admin',
+      requiresAuth: true,
+      roles: [ROLES.ADMIN, ROLES.MODERATOR],
+    },
   },
   {
     path: '/admin/events',
     name: 'admin-events',
     component: AdminEventsPage,
-    meta: { title: 'Manage Events', requiresAuth: true, roles: ['admin'] },
+    meta: {
+      titleKey: 'nav.admin',
+      requiresAuth: true,
+      roles: [ROLES.ADMIN, ROLES.MODERATOR],
+    },
   },
   {
     path: '/admin/routes',
     name: 'admin-routes',
     component: AdminRoutesPage,
-    meta: { title: 'Manage Routes', requiresAuth: true, roles: ['admin'] },
+    meta: {
+      titleKey: 'nav.admin',
+      requiresAuth: true,
+      roles: [ROLES.ADMIN, ROLES.MODERATOR],
+    },
   },
   {
     path: '/admin/users',
     name: 'admin-users',
     component: AdminUsersPage,
-    meta: { title: 'Manage Users', requiresAuth: true, roles: ['admin'] },
+    meta: {
+      titleKey: 'nav.admin',
+      requiresAuth: true,
+      roles: [ROLES.ADMIN], // Only admins can manage users
+    },
   },
 
-  // 404 catch-all
+  // ===== 404 CATCH-ALL =====
+  {
+    path: '/404',
+    name: 'not-found-page',
+    component: NotFoundPage,
+    meta: { titleKey: 'errors.notFound' },
+  },
   {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
     component: NotFoundPage,
-    meta: { title: 'Page Not Found' },
+    meta: { titleKey: 'errors.notFound' },
   },
 ]
 
 export default routes
-

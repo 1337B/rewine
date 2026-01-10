@@ -3,11 +3,16 @@ import { router } from './router'
 
 /**
  * Initialize authentication state on app startup
+ * This function is resilient to errors - the app will mount even if auth fails
  */
 export async function initAuth(): Promise<void> {
-  const authStore = useAuthStore()
-
-  await authStore.initSession()
+  try {
+    const authStore = useAuthStore()
+    await authStore.initSession()
+  } catch (error) {
+    console.warn('[Auth] Failed to initialize session:', error)
+    // Don't block app initialization if auth fails
+  }
 }
 
 /**
