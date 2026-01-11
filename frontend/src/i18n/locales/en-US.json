@@ -21,7 +21,9 @@
     "viewMore": "View more",
     "viewAll": "View all",
     "noResults": "No results",
-    "required": "Required"
+    "required": "Required",
+    "goHome": "Go Home",
+    "tryAgain": "Try Again"
   },
   "auth": {
     "login": "Login",
@@ -44,7 +46,12 @@
     "cellar": "My Cellar",
     "events": "Events",
     "routes": "Wine Routes",
-    "admin": "Admin"
+    "admin": "Admin",
+    "adminDashboard": "Dashboard",
+    "adminWines": "Manage Wines",
+    "adminEvents": "Manage Events",
+    "adminRoutes": "Manage Routes",
+    "adminUsers": "Manage Users"
   },
   "wines": {
     "title": "Wines",
@@ -130,9 +137,13 @@
   "errors": {
     "generic": "Something went wrong",
     "notFound": "Page not found",
+    "notFoundDescription": "Oops! This page seems to have disappeared like wine at a party.",
     "unauthorized": "Unauthorized",
-    "forbidden": "Access denied",
-    "serverError": "Server error",
+    "unauthorizedDescription": "Please log in to access this page.",
+    "forbidden": "Access Denied",
+    "forbiddenDescription": "Sorry, you don't have permission to access this page. Please contact an administrator if you believe this is an error.",
+    "serverError": "Server Error",
+    "serverErrorDescription": "Something went wrong on our end. Our team has been notified and is working to fix the issue.",
     "networkError": "Network error"
   }
 }

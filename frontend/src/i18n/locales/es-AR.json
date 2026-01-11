@@ -21,7 +21,9 @@
     "viewMore": "Ver más",
     "viewAll": "Ver todos",
     "noResults": "Sin resultados",
-    "required": "Requerido"
+    "required": "Requerido",
+    "goHome": "Ir al Inicio",
+    "tryAgain": "Reintentar"
   },
   "auth": {
     "login": "Iniciar sesión",
@@ -44,7 +46,12 @@
     "cellar": "Mi Bodega",
     "events": "Eventos",
     "routes": "Rutas del Vino",
-    "admin": "Administración"
+    "admin": "Administración",
+    "adminDashboard": "Panel",
+    "adminWines": "Gestionar Vinos",
+    "adminEvents": "Gestionar Eventos",
+    "adminRoutes": "Gestionar Rutas",
+    "adminUsers": "Gestionar Usuarios"
   },
   "wines": {
     "title": "Vinos",
@@ -130,9 +137,13 @@
   "errors": {
     "generic": "Algo salió mal",
     "notFound": "Página no encontrada",
+    "notFoundDescription": "¡Ups! Esta página parece haber desaparecido como el vino en una fiesta.",
     "unauthorized": "No autorizado",
-    "forbidden": "Acceso denegado",
-    "serverError": "Error del servidor",
+    "unauthorizedDescription": "Por favor, iniciá sesión para acceder a esta página.",
+    "forbidden": "Acceso Denegado",
+    "forbiddenDescription": "Lo sentimos, no tenés permiso para acceder a esta página. Contactá a un administrador si creés que esto es un error.",
+    "serverError": "Error del Servidor",
+    "serverErrorDescription": "Algo salió mal de nuestro lado. Nuestro equipo fue notificado y está trabajando para solucionar el problema.",
     "networkError": "Error de conexión"
   }
 }

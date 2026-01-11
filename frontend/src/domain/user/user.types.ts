@@ -2,6 +2,11 @@
  * User domain types
  */
 
+/**
+ * User roles matching the RBAC system
+ */
+export type UserRole = 'ROLE_ADMIN' | 'ROLE_MODERATOR' | 'ROLE_PARTNER' | 'ROLE_USER'
+
 export interface User {
   id: string
   email: string
@@ -14,7 +19,6 @@ export interface User {
   updatedAt: Date
 }
 
-export type UserRole = 'user' | 'admin' | 'winery' | 'sommelier'
 
 export interface UserPreferences {
   favoriteWineTypes: string[]

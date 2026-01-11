@@ -14,7 +14,11 @@ app.use(pinia)
 app.use(router)
 app.use(i18n)
 
-initAuth().then(() => {
-  app.mount('#app')
+// Mount app first, then initialize auth in the background
+app.mount('#app')
+
+// Initialize auth session (non-blocking)
+initAuth().catch((error) => {
+  console.warn('[Main] Auth initialization failed:', error)
 })
 
