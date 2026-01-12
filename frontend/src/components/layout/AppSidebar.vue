@@ -38,60 +38,62 @@ function closeSidebar() {
 </script>
 
 <template>
-  <!-- Overlay for mobile -->
-  <Transition name="fade">
-    <div
-      v-if="isOpen"
-      class="fixed inset-0 bg-black/50 z-40"
-      @click="closeSidebar"
-    />
-  </Transition>
+  <div class="lg:hidden">
+    <!-- Overlay for mobile -->
+    <Transition name="fade">
+      <div
+        v-if="isOpen"
+        class="fixed inset-0 bg-black/50 z-40"
+        @click="closeSidebar"
+      />
+    </Transition>
 
-  <!-- Mobile Sidebar -->
-  <aside
-    :class="[
-      'fixed top-16 left-0 z-40 h-[calc(100vh-4rem)] w-72 bg-white border-r border-gray-200 shadow-xl transform transition-transform duration-300 ease-in-out',
-      isOpen ? 'translate-x-0' : '-translate-x-full',
-    ]"
-  >
-    <nav class="h-full overflow-y-auto py-4">
-      <ul class="space-y-1 px-3">
-        <li v-for="item in visibleNavItems" :key="item.path">
+    <!-- Mobile Sidebar -->
+    <aside
+      :class="[
+        'fixed top-16 left-0 z-40 h-[calc(100vh-4rem)] w-72 bg-white border-r border-gray-200 shadow-xl transform transition-transform duration-300 ease-in-out',
+        isOpen ? 'translate-x-0' : '-translate-x-full',
+      ]"
+    >
+      <nav class="h-full overflow-y-auto py-4">
+        <ul class="space-y-1 px-3">
+          <li v-for="item in visibleNavItems" :key="item.path">
+            <router-link
+              :to="item.path"
+              :class="[
+                'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200',
+                isActive(item)
+                  ? 'bg-wine-50 text-wine-700'
+                  : 'text-gray-700 hover:bg-gray-50',
+              ]"
+              @click="closeSidebar"
+            >
+              <img :src="item.icon" :alt="t(item.labelKey)" class="w-6 h-6" />
+              <span>{{ t(item.labelKey) }}</span>
+            </router-link>
+          </li>
+        </ul>
+
+        <!-- Login/Register for mobile -->
+        <div v-if="!isAuthenticated" class="mt-6 px-3 space-y-2">
           <router-link
-            :to="item.path"
-            :class="[
-              'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200',
-              isActive(item)
-                ? 'bg-wine-50 text-wine-700'
-                : 'text-gray-700 hover:bg-gray-50',
-            ]"
+            to="/login"
+            class="block w-full px-4 py-3 text-center text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
             @click="closeSidebar"
           >
-            <img :src="item.icon" :alt="t(item.labelKey)" class="w-6 h-6" />
-            <span>{{ t(item.labelKey) }}</span>
+            {{ t('auth.login') }}
           </router-link>
-        </li>
-      </ul>
-
-      <!-- Login/Register for mobile -->
-      <div v-if="!isAuthenticated" class="mt-6 px-3 space-y-2">
-        <router-link
-          to="/login"
-          class="block w-full px-4 py-3 text-center text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
-          @click="closeSidebar"
-        >
-          {{ t('auth.login') }}
-        </router-link>
-        <router-link
-          to="/register"
-          class="block w-full px-4 py-3 text-center text-sm font-medium text-white bg-wine-600 hover:bg-wine-700 rounded-xl transition-colors"
-          @click="closeSidebar"
-        >
-          {{ t('auth.register') }}
-        </router-link>
-      </div>
-    </nav>
-  </aside>
+          <router-link
+            to="/register"
+            class="block w-full px-4 py-3 text-center text-sm font-medium text-white bg-wine-600 hover:bg-wine-700 rounded-xl transition-colors"
+            @click="closeSidebar"
+          >
+            {{ t('auth.register') }}
+          </router-link>
+        </div>
+      </nav>
+    </aside>
+  </div>
 </template>
 
 <style scoped>
