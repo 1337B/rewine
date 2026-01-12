@@ -4,6 +4,8 @@ import { useRoute } from 'vue-router'
 import AppHeader from './AppHeader.vue'
 import AppSidebar from './AppSidebar.vue'
 import AppFooter from './AppFooter.vue'
+import ToastContainer from '@components/feedback/ToastContainer.vue'
+import ConfirmDialog from '@components/feedback/ConfirmDialog.vue'
 
 const route = useRoute()
 
@@ -17,8 +19,8 @@ const isFullWidth = computed(() => fullWidthPages.includes(route.path))
     <AppHeader />
 
     <div class="flex flex-1">
-      <!-- Mobile Sidebar (hidden by default, shown on toggle) -->
-      <AppSidebar class="lg:hidden" />
+      <!-- Mobile Sidebar -->
+      <AppSidebar />
 
       <!-- Main content -->
       <main class="flex-1">
@@ -34,6 +36,10 @@ const isFullWidth = computed(() => fullWidthPages.includes(route.path))
     </div>
 
     <AppFooter />
+
+    <!-- Global UI Components -->
+    <ToastContainer />
+    <ConfirmDialog use-store />
   </div>
 </template>
 

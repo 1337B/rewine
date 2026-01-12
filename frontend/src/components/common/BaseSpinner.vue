@@ -1,46 +1,66 @@
 <script setup lang="ts">
+/**
+ * BaseSpinner - Loading indicator component
+ *
+ * Displays an animated spinner for loading states.
+ * Supports multiple sizes and color variants.
+ */
+
 interface Props {
-  size?: 'sm' | 'md' | 'lg'
-  color?: 'primary' | 'white'
+  /** Spinner size */
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+  /** Color variant */
+  color?: 'primary' | 'white' | 'gray' | 'current'
+  /** Accessibility label */
+  label?: string
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   size: 'md',
   color: 'primary',
+  label: 'Loading...',
 })
 
-const sizeClasses = {
+const sizeClasses: Record<string, string> = {
+  xs: 'h-3 w-3',
   sm: 'h-4 w-4',
   md: 'h-6 w-6',
   lg: 'h-8 w-8',
+  xl: 'h-12 w-12',
 }
 
-const colorClasses = {
+const colorClasses: Record<string, string> = {
   primary: 'text-wine-600',
   white: 'text-white',
+  gray: 'text-gray-400',
+  current: 'text-current',
 }
 </script>
 
 <template>
-  <svg
-    :class="['animate-spin', sizeClasses[size], colorClasses[color]]"
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-  >
-    <circle
-      class="opacity-25"
-      cx="12"
-      cy="12"
-      r="10"
-      stroke="currentColor"
-      stroke-width="4"
-    />
-    <path
-      class="opacity-75"
-      fill="currentColor"
-      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-    />
-  </svg>
+  <span class="inline-flex" role="status" :aria-label="label">
+    <svg
+      :class="['animate-spin', sizeClasses[size], colorClasses[color]]"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <circle
+        class="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        stroke-width="4"
+      />
+      <path
+        class="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      />
+    </svg>
+    <span class="sr-only">{{ label }}</span>
+  </span>
 </template>
 
