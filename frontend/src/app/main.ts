@@ -8,17 +8,30 @@ import { initAuth } from './auth'
 import '@/assets/styles/tailwind.css'
 import '@/assets/styles/globals.css'
 
-const app = createApp(App)
+/**
+ * Initialize and mount the Vue application
+ */
+async function bootstrap() {
+  // Start MSW mock service worker in development if enabled
+  if (import.meta.env.DEV && import.meta.env.VITE_MOCK_API === 'true') {
+    const { startMockServiceWorker } = await import('@/mocks')
+    await startMockServiceWorker()
+  }
 
-app.use(pinia)
-app.use(router)
-app.use(i18n)
+  const app = createApp(App)
 
-// Mount app first, then initialize auth in the background
-app.mount('#app')
+  app.use(pinia)
+  app.use(router)
+  app.use(i18n)
 
-// Initialize auth session (non-blocking)
-initAuth().catch((error) => {
-  console.warn('[Main] Auth initialization failed:', error)
-})
+  // Mount app first, then initialize auth in the background
+  app.mount('#app')
 
+  // Initialize auth session (non-blocking)
+  initAuth().catch((error) => {
+    console.warn('[Main] Auth initialization failed:', error)
+  })
+}
+
+// Bootstrap the application
+bootstrap()
