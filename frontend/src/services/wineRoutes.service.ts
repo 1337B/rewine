@@ -66,7 +66,7 @@ export const wineRoutesService = {
    * Update a wine route
    */
   async updateWineRoute(id: string, route: Partial<WineRoute>): Promise<WineRoute> {
-    const dto = mapWineRouteToDto(route)
+    const dto = mapWineRouteToDto(route) as Partial<CreateWineRouteRequestDto>
     const response = await wineRoutesClient.updateWineRoute(id, dto)
     return mapWineRouteFromDto(response)
   },

@@ -16,7 +16,7 @@ import { computed, ref } from 'vue'
 
 interface Props {
   /** Input value (v-model) */
-  modelValue: string | number
+  modelValue: string | number | null
   /** Input type */
   type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search'
   /** Input label */

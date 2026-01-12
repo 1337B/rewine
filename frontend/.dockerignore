@@ -1,0 +1,51 @@
+# =============================================================================
+# Docker Ignore - Rewine Frontend
+# =============================================================================
+# Exclude files not needed in Docker build context
+# =============================================================================
+
+# Dependencies (will be installed fresh in container)
+node_modules/
+
+# Build output (will be generated in container)
+dist/
+
+# Development files
+.git/
+.gitignore
+.vscode/
+.idea/
+*.md
+!README.md
+
+# Environment files (use build args instead)
+.env
+.env.local
+.env.*.local
+
+# Test files
+tests/
+coverage/
+*.spec.ts
+*.test.ts
+playwright.config.ts
+vitest.config.ts
+playwright-report/
+test-results/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+
+# TypeScript cache
+*.tsbuildinfo
+

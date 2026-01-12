@@ -40,11 +40,6 @@ const animationClasses = {
   none: '',
 }
 
-// Default heights for text variant
-const textHeights = {
-  1: 'h-4',
-  default: 'h-4',
-}
 
 function getHeightClass(index: number): string {
   if (props.height !== 'auto') return ''

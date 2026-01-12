@@ -9,7 +9,6 @@ import http from '@app/http'
 import { API_ENDPOINTS } from '@config/constants'
 import type { ApiResponse, PaginatedResponse } from '@api/api.types'
 import type {
-  WineDto,
   WineSummaryDto,
   WineDetailsDto,
   WineReviewDto,

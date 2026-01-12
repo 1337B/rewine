@@ -1,5 +1,23 @@
-import type { User, UserPreferences, UserProfile, UserStats, NotificationPreferences, PriceRange } from './user.types'
-import type { UserDto, UserPreferencesDto, UserProfileDto, UserStatsDto } from '@api/dto/users.dto'
+import type { User, UserPreferences, UserProfile, UserStats, NotificationPreferences, PriceRange, UserRole } from './user.types'
+import type { UserDto, UserPreferencesDto, UserProfileDto, UserStatsDto, NotificationPreferencesDto } from '@api/dto/users.dto'
+
+/**
+ * Map role string to UserRole
+ */
+function mapRole(role: string): UserRole {
+  // Handle both formats: 'user' and 'ROLE_USER'
+  const roleMap: Record<string, UserRole> = {
+    'user': 'ROLE_USER',
+    'admin': 'ROLE_ADMIN',
+    'moderator': 'ROLE_MODERATOR',
+    'partner': 'ROLE_PARTNER',
+    'ROLE_USER': 'ROLE_USER',
+    'ROLE_ADMIN': 'ROLE_ADMIN',
+    'ROLE_MODERATOR': 'ROLE_MODERATOR',
+    'ROLE_PARTNER': 'ROLE_PARTNER',
+  }
+  return roleMap[role] ?? 'ROLE_USER'
+}
 
 /**
  * Map User DTO to domain model
@@ -10,7 +28,7 @@ export function mapUserFromDto(dto: UserDto): User {
     email: dto.email,
     name: dto.name,
     avatar: dto.avatar ?? null,
-    roles: dto.roles ?? ['user'],
+    roles: (dto.roles ?? ['user']).map(mapRole),
     preferences: dto.preferences ? mapUserPreferencesFromDto(dto.preferences) : getDefaultPreferences(),
     isVerified: dto.is_verified ?? false,
     createdAt: new Date(dto.created_at),
@@ -45,7 +63,7 @@ function mapPriceRangeFromDto(dto: { min: number; max: number }): PriceRange {
 /**
  * Map notification preferences from DTO
  */
-function mapNotificationPreferencesFromDto(dto?: Partial<NotificationPreferences>): NotificationPreferences {
+function mapNotificationPreferencesFromDto(dto?: NotificationPreferencesDto | null): NotificationPreferences {
   return {
     email: dto?.email ?? true,
     push: dto?.push ?? false,

@@ -61,7 +61,7 @@ export interface EventAttendee {
   eventId: string
   userId: string
   userName: string
-  status: 'registered' | 'confirmed' | 'cancelled'
+  status: 'registered' | 'confirmed' | 'cancelled' | 'attended'
   registeredAt: Date
 }
 

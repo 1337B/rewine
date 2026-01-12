@@ -70,6 +70,7 @@ export const STORAGE_KEYS = {
 // API endpoints
 export const API_ENDPOINTS = {
   AUTH: {
+    BASE: '/auth',
     LOGIN: '/auth/login',
     REGISTER: '/auth/register',
     REFRESH: '/auth/refresh',
