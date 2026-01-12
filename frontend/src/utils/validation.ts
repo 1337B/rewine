@@ -1,6 +1,145 @@
 /**
  * Validation utility functions
+ *
+ * Includes helpers for:
+ * - Basic validation checks
+ * - Zod schema integration
+ * - Form field error handling
  */
+
+import { z, type ZodSchema, type ZodError } from 'zod'
+
+// ============================================================================
+// Zod Integration Helpers
+// ============================================================================
+
+/**
+ * Field errors map type
+ */
+export type FieldErrors = Record<string, string | undefined>
+
+/**
+ * Validation result type
+ */
+export interface ValidationResult<T> {
+  success: boolean
+  data?: T
+  errors: FieldErrors
+}
+
+/**
+ * Validate data against a Zod schema
+ * Returns a structured result with field-level errors
+ */
+export function validateWithSchema<T>(
+  schema: ZodSchema<T>,
+  data: unknown
+): ValidationResult<T> {
+  const result = schema.safeParse(data)
+
+  if (result.success) {
+    return {
+      success: true,
+      data: result.data,
+      errors: {},
+    }
+  }
+
+  return {
+    success: false,
+    errors: formatZodErrors(result.error),
+  }
+}
+
+/**
+ * Format Zod errors into a field errors map
+ * Returns the first error message for each field
+ */
+export function formatZodErrors(error: ZodError): FieldErrors {
+  const errors: FieldErrors = {}
+
+  for (const issue of error.issues) {
+    const path = issue.path.join('.')
+    // Only keep the first error per field
+    if (!errors[path]) {
+      errors[path] = issue.message
+    }
+  }
+
+  return errors
+}
+
+/**
+ * Get all errors for a field from a ZodError
+ */
+export function getZodFieldErrors(error: ZodError, field: string): string[] {
+  return error.issues
+    .filter((issue) => issue.path.join('.') === field)
+    .map((issue) => issue.message)
+}
+
+/**
+ * Create a validation function from a Zod schema
+ * Returns undefined if valid, or the first error message if invalid
+ */
+export function createFieldValidator<T>(
+  schema: ZodSchema<T>,
+  field: keyof T & string
+): (value: unknown) => string | undefined {
+  return (value: unknown) => {
+    // Create a partial object with just this field
+    const data = { [field]: value }
+    const result = schema.safeParse(data)
+
+    if (result.success) {
+      return undefined
+    }
+
+    // Find error for this specific field
+    const fieldError = result.error.issues.find(
+      (issue) => issue.path[0] === field
+    )
+
+    return fieldError?.message
+  }
+}
+
+/**
+ * Trim string values in an object
+ */
+export function trimFormData<T extends Record<string, unknown>>(data: T): T {
+  const trimmed = { ...data }
+
+  for (const key in trimmed) {
+    const value = trimmed[key]
+    if (typeof value === 'string') {
+      (trimmed as Record<string, unknown>)[key] = value.trim()
+    }
+  }
+
+  return trimmed
+}
+
+/**
+ * Create a Zod schema with i18n error messages
+ * Helper to use with translation function
+ */
+export function createI18nSchema<T extends z.ZodTypeAny>(
+  schema: T,
+  errorMap: z.ZodErrorMap
+): T {
+  return schema.superRefine((_, ctx) => {
+    ctx.addIssue = new Proxy(ctx.addIssue, {
+      apply(target, thisArg, args) {
+        return Reflect.apply(target, thisArg, args)
+      },
+    })
+  }) as T
+}
+
+// ============================================================================
+// Basic Validation Functions
+// ============================================================================
 
 /**
  * Check if a string is a valid email
@@ -126,4 +265,3 @@ export function getFieldError(
 ): string | undefined {
   return errors[field]?.[0]
 }
-

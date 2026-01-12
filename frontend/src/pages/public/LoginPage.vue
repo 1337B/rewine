@@ -1,9 +1,23 @@
 <script setup lang="ts">
+/**
+ * LoginPage - User authentication page
+ *
+ * Features:
+ * - Zod schema validation
+ * - Field-level error display
+ * - Loading state handling
+ * - Auto-trim inputs
+ * - Social login buttons (placeholder)
+ * - i18n support
+ */
+
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@stores/auth.store'
 import { useToast } from '@composables/useToast'
+import { loginUserSchema } from '@domain/user/user.validators'
+import { validateWithSchema, trimFormData } from '@utils/validation'
 import BaseButton from '@components/common/BaseButton.vue'
 import BaseInput from '@components/common/BaseInput.vue'
 import BaseCard from '@components/common/BaseCard.vue'
@@ -18,22 +32,21 @@ const toast = useToast()
 const email = ref('')
 const password = ref('')
 const formSubmitted = ref(false)
+const fieldErrors = ref<Record<string, string | undefined>>({})
 
-// Computed from store
+// Computed
 const loading = computed(() => authStore.loading)
 const generalError = computed(() => authStore.error)
 
-// Field-level errors
+// Field error getters
 const emailError = computed(() => {
   if (!formSubmitted.value) return undefined
-  if (!email.value) return t('auth.emailRequired')
-  return authStore.getFieldError('email') ?? undefined
+  return fieldErrors.value.email ?? authStore.getFieldError('email') ?? undefined
 })
 
 const passwordError = computed(() => {
   if (!formSubmitted.value) return undefined
-  if (!password.value) return t('auth.passwordRequired')
-  return authStore.getFieldError('password') ?? undefined
+  return fieldErrors.value.password ?? authStore.getFieldError('password') ?? undefined
 })
 
 // Check for session expired on mount
@@ -46,22 +59,36 @@ onMounted(() => {
 
 async function handleSubmit() {
   formSubmitted.value = true
+  fieldErrors.value = {}
   authStore.clearErrors()
 
-  // Basic client-side validation
-  if (!email.value || !password.value) {
+  // Trim and prepare form data
+  const formData = trimFormData({
+    email: email.value,
+    password: password.value,
+  })
+
+  // Update refs with trimmed values
+  email.value = formData.email
+  password.value = formData.password
+
+  // Validate with Zod schema
+  const validation = validateWithSchema(loginUserSchema, formData)
+
+  if (!validation.success) {
+    fieldErrors.value = validation.errors
     return
   }
 
   try {
-    await authStore.login(email.value, password.value)
+    await authStore.login(formData.email, formData.password)
 
-    // Redirect to intended destination or home
+    // Redirect to intended destination
     const returnUrl = (route.query.returnUrl as string) || '/'
     toast.success(t('auth.loginSuccess'))
     router.push(returnUrl)
   } catch {
-    // Error is already handled in store
+    // Error handled in store, show toast
     toast.error(generalError.value || t('auth.loginError'))
   }
 }
@@ -96,31 +123,29 @@ function loginWithFacebook() {
 
       <!-- Email Login Form -->
       <form @submit.prevent="handleSubmit" class="space-y-4" novalidate>
-        <div>
-          <BaseInput
-            v-model="email"
-            type="email"
-            :label="t('auth.email')"
-            placeholder="your@email.com"
-            :error="emailError"
-            :disabled="loading"
-            autocomplete="email"
-            required
-          />
-        </div>
+        <BaseInput
+          v-model="email"
+          type="email"
+          name="email"
+          :label="t('auth.email')"
+          placeholder="your@email.com"
+          :error="emailError"
+          :disabled="loading"
+          autocomplete="email"
+          required
+        />
 
-        <div>
-          <BaseInput
-            v-model="password"
-            type="password"
-            :label="t('auth.password')"
-            placeholder="••••••••"
-            :error="passwordError"
-            :disabled="loading"
-            autocomplete="current-password"
-            required
-          />
-        </div>
+        <BaseInput
+          v-model="password"
+          type="password"
+          name="password"
+          :label="t('auth.password')"
+          placeholder="••••••••"
+          :error="passwordError"
+          :disabled="loading"
+          autocomplete="current-password"
+          required
+        />
 
         <div class="flex items-center justify-end">
           <router-link
@@ -136,6 +161,7 @@ function loginWithFacebook() {
         <div
           v-if="generalError && !emailError && !passwordError"
           class="p-3 bg-red-50 border border-red-200 rounded-lg"
+          role="alert"
         >
           <p class="text-sm text-red-700 flex items-center gap-2">
             <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -149,7 +175,7 @@ function loginWithFacebook() {
           type="submit"
           :loading="loading"
           :disabled="loading"
-          class="w-full"
+          full-width
         >
           {{ t('auth.signIn') }}
         </BaseButton>
