@@ -101,7 +101,7 @@ export const routes: RouteRecordRaw[] = [
     meta: { titleKey: 'wines.title' },
   },
   {
-    path: '/wines/compare',
+    path: '/wines/compare/:wineAId?',
     name: 'wine-compare',
     component: WineComparePage,
     meta: { titleKey: 'wines.compare' },
@@ -121,6 +121,16 @@ export const routes: RouteRecordRaw[] = [
     name: 'wine-details',
     component: WineDetailsPage,
     meta: { titleKey: 'wines.title' },
+  },
+  {
+    path: '/wines/:id/ai-profile',
+    name: 'wine-ai-profile',
+    component: () => import('@pages/wines/AiProfilePage.vue'),
+    meta: {
+      titleKey: 'aiProfile.title',
+      requiresAuth: true,
+      roles: [ROLES.USER, ROLES.PARTNER, ROLES.MODERATOR, ROLES.ADMIN],
+    },
   },
 
   // ===== CELLAR ROUTES (Requires authentication) =====

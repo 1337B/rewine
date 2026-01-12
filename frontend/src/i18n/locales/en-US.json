@@ -223,6 +223,53 @@
     "scanError": "Failed to scan image. Please try again.",
     "searchError": "Search failed. Please try again.",
     "scanWine": "Scan Wine"
+  },
+  "compare": {
+    "title": "Compare Wines",
+    "subtitle": "Select two wines to compare side by side",
+    "wineA": "Wine A",
+    "wineB": "Wine B",
+    "selectFirstWine": "Select the first wine to compare",
+    "selectSecondWine": "Select the second wine to compare",
+    "selectWine": "Select Wine",
+    "changeWine": "Change Wine",
+    "swap": "Swap",
+    "clearAll": "Clear All",
+    "searchWine": "Search for a wine",
+    "searchPlaceholder": "Search by name, winery, or region...",
+    "noResults": "No wines found",
+    "typeToSearch": "Type at least 2 characters to search",
+    "attribute": "Attribute",
+    "cachedResult": "This comparison was loaded from cache",
+    "aiRecommendation": "AI Recommendation",
+    "emptyTitle": "No wines to compare",
+    "emptyDescription": "Add wines to compare from the wine search or details page",
+    "browseWines": "Browse Wines"
+  },
+  "aiProfile": {
+    "title": "AI Wine Profile",
+    "poweredBy": "Powered by SommellIApp",
+    "loading": "Generating AI profile...",
+    "cached": "Cached",
+    "generatedAt": "Generated",
+    "summary": "Summary",
+    "personality": "Wine Personality",
+    "idealOccasions": "Ideal Occasions",
+    "foodPairings": "Food Pairings",
+    "similarWines": "Similar Wines",
+    "viewWineDetails": "View Wine Details",
+    "compareThisWine": "Compare This Wine",
+    "errorTitle": "Could not load profile"
+  },
+  "wineDetails": {
+    "alcohol": "Alcohol",
+    "addToCellar": "Add to Cellar",
+    "aiSommelier": "AI Sommelier",
+    "consultAi": "Get AI-powered insights and recommendations for this wine",
+    "profileGenerated": "AI profile already generated. Click to view.",
+    "viewProfile": "View Profile",
+    "generateProfile": "Consult AI",
+    "notFound": "Wine not found"
   }
 }
 
