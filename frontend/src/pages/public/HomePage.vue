@@ -70,7 +70,6 @@ const popularGrapes = [
           <div class="flex flex-wrap justify-center gap-4">
             <router-link to="/wines">
               <BaseButton size="lg" class="px-8">
-                <img src="/images/icons/reshot-icon-red-wine-L2HFAY75WG.svg" alt="" class="w-5 h-5 mr-2" />
                 Explore Wines
               </BaseButton>
             </router-link>
