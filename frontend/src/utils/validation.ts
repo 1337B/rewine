@@ -265,3 +265,14 @@ export function getFieldError(
 ): string | undefined {
   return errors[field]?.[0]
 }
+
+/**
+ * Check if a string is non-empty (not null, undefined, or whitespace only)
+ */
+export function isNonEmpty(value: string | null | undefined): boolean {
+  if (value === null || value === undefined) {
+    return false
+  }
+  return value.trim().length > 0
+}
+
