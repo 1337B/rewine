@@ -1,0 +1,30 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "types": ["vitest/globals", "node", "jsdom"],
+    "baseUrl": "..",
+    "paths": {
+      "@/*": ["src/*"],
+      "@app/*": ["src/app/*"],
+      "@components/*": ["src/components/*"],
+      "@pages/*": ["src/pages/*"],
+      "@domain/*": ["src/domain/*"],
+      "@services/*": ["src/services/*"],
+      "@api/*": ["src/api/*"],
+      "@stores/*": ["src/stores/*"],
+      "@composables/*": ["src/composables/*"],
+      "@utils/*": ["src/utils/*"],
+      "@config/*": ["src/config/*"],
+      "@i18n/*": ["src/i18n/*"],
+      "@types/*": ["src/types/*"]
+    }
+  },
+  "include": [
+    "./**/*.ts",
+    "./**/*.spec.ts",
+    "./**/*.test.ts",
+    "../src/**/*.vue",
+    "../src/**/*.ts"
+  ]
+}
