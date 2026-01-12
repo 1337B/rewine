@@ -7,7 +7,7 @@
  * - Form field error handling
  */
 
-import { z, type ZodSchema, type ZodError } from 'zod'
+import { type ZodSchema, type ZodError } from 'zod'
 
 // ============================================================================
 // Zod Integration Helpers
@@ -120,22 +120,6 @@ export function trimFormData<T extends Record<string, unknown>>(data: T): T {
   return trimmed
 }
 
-/**
- * Create a Zod schema with i18n error messages
- * Helper to use with translation function
- */
-export function createI18nSchema<T extends z.ZodTypeAny>(
-  schema: T,
-  errorMap: z.ZodErrorMap
-): T {
-  return schema.superRefine((_, ctx) => {
-    ctx.addIssue = new Proxy(ctx.addIssue, {
-      apply(target, thisArg, args) {
-        return Reflect.apply(target, thisArg, args)
-      },
-    })
-  }) as T
-}
 
 // ============================================================================
 // Basic Validation Functions

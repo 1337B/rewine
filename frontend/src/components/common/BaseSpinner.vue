@@ -15,7 +15,7 @@ interface Props {
   label?: string
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   size: 'md',
   color: 'primary',
   label: 'Loading...',

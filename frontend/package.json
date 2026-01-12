@@ -7,6 +7,8 @@
     "dev": "vite",
     "dev:mock": "VITE_MOCK_API=true vite",
     "build": "vue-tsc && vite build",
+    "build:prod": "VITE_APP_ENV=production vue-tsc && vite build",
+    "build:docker": "vue-tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write src/",
@@ -17,7 +19,10 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:setup": "playwright install",
-    "msw:init": "npx msw init public/ --save"
+    "msw:init": "npx msw init public/ --save",
+    "docker:build": "docker build -t rewine-frontend .",
+    "docker:run": "docker run -p 8080:80 rewine-frontend",
+    "docker:dev": "docker build -t rewine-frontend . && docker run -p 8080:80 rewine-frontend"
   },
   "dependencies": {
     "@vueuse/core": "^12.4.0",

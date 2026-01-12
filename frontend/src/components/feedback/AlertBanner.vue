@@ -5,7 +5,7 @@ interface Props {
   dismissible?: boolean
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   type: 'info',
   title: '',
   dismissible: false,

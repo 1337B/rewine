@@ -373,7 +373,7 @@ function getWinnerClass(index: number, winnerIndex: number | null): string {
     </BaseEmptyState>
 
     <!-- Search Modal -->
-    <BaseModal :open="searchModalOpen" @close="searchModalOpen = false">
+    <BaseModal v-model="searchModalOpen" @close="searchModalOpen = false">
       <template #header>
         <h2 class="text-xl font-semibold text-gray-900">{{ t('compare.searchWine') }}</h2>
       </template>

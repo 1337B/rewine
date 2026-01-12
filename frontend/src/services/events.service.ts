@@ -62,7 +62,7 @@ export const eventsService = {
    * Update an event
    */
   async updateEvent(id: string, event: Partial<Event>): Promise<Event> {
-    const dto = mapEventToDto(event)
+    const dto = mapEventToDto(event) as Partial<CreateEventRequestDto>
     const response = await eventsClient.updateEvent(id, dto)
     return mapEventFromDto(response)
   },

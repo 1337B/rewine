@@ -25,7 +25,7 @@ import type {
   WineScanResult,
 } from '@domain/wine/wine.types'
 import type { PaginationMeta } from '@api/api.types'
-import type { WineFilterParamsDto, CreateWineRequestDto } from '@api/dto/wines.dto'
+import type { WineFilterParamsDto, CreateWineRequestDto, UpdateWineRequestDto } from '@api/dto/wines.dto'
 
 // ============================================================================
 // Result Types
@@ -119,7 +119,7 @@ export const winesService = {
    * Update a wine
    */
   async updateWine(id: string, wine: Partial<Wine>): Promise<Wine> {
-    const dto = mapWineToDto(wine)
+    const dto = mapWineToDto(wine) as UpdateWineRequestDto
     const response = await winesClient.updateWine(id, dto)
     return mapWineFromDto(response)
   },
@@ -244,6 +244,15 @@ export const winesService = {
  * Map domain filter to API filter params
  */
 function mapFilterToParams(filter: WineFilter | undefined, page: number, pageSize: number): WineFilterParamsDto {
+  // Map sortBy from domain format to DTO format
+  const sortByMap: Record<string, 'name' | 'price' | 'rating' | 'vintage' | 'created_at'> = {
+    'name': 'name',
+    'price': 'price',
+    'rating': 'rating',
+    'vintage': 'vintage',
+    'createdAt': 'created_at',
+  }
+
   return {
     page,
     page_size: pageSize,
@@ -260,7 +269,7 @@ function mapFilterToParams(filter: WineFilter | undefined, page: number, pageSiz
     vintage: filter?.vintage,
     min_vintage: filter?.minVintage,
     max_vintage: filter?.maxVintage,
-    sort_by: filter?.sortBy,
+    sort_by: filter?.sortBy ? sortByMap[filter.sortBy] : undefined,
     sort_order: filter?.sortOrder,
   }
 }

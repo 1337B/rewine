@@ -8,11 +8,12 @@ import BaseCard from '@components/common/BaseCard.vue'
 import BaseSpinner from '@components/common/BaseSpinner.vue'
 import BaseEmptyState from '@components/common/BaseEmptyState.vue'
 import { WINE_TYPES, WINE_REGIONS } from '@config/constants'
+import type { WineType } from '@domain/wine/wine.types'
 
 const winesStore = useWinesStore()
 
 const search = ref('')
-const selectedType = ref<string | null>(null)
+const selectedType = ref<WineType | null>(null)
 const selectedRegion = ref<string | null>(null)
 
 const debouncedSearch = useDebounce(search, 300)

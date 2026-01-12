@@ -2,7 +2,7 @@ import { usersClient } from '@api/clients/users.client'
 import { mapUserFromDto, mapUserProfileFromDto, mapUserStatsFromDto, mapUserPreferencesToDto } from '@domain/user/user.mappers'
 import type { User, UserProfile, UserStats, UserPreferences } from '@domain/user/user.types'
 import type { PaginationMeta } from '@api/api.types'
-import type { UserFilterParamsDto } from '@api/dto/users.dto'
+import type { UserFilterParamsDto, UpdateUserPreferencesRequestDto } from '@api/dto/users.dto'
 
 export interface UsersResult {
   users: User[]
@@ -61,7 +61,7 @@ export const usersService = {
    * Update user preferences
    */
   async updatePreferences(preferences: Partial<UserPreferences>): Promise<User> {
-    const dto = mapUserPreferencesToDto(preferences)
+    const dto = mapUserPreferencesToDto(preferences) as UpdateUserPreferencesRequestDto
     const response = await usersClient.updatePreferences(dto)
     return mapUserFromDto(response)
   },
