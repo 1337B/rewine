@@ -1,9 +1,9 @@
 import { z } from 'zod'
 
 /**
- * User role enum schema
+ * User role enum schema matching RBAC system
  */
-export const userRoleSchema = z.enum(['user', 'admin', 'winery', 'sommelier'])
+export const userRoleSchema = z.enum(['ROLE_ADMIN', 'ROLE_MODERATOR', 'ROLE_PARTNER', 'ROLE_USER'])
 
 /**
  * Theme enum schema
@@ -52,7 +52,7 @@ export const userSchema = z.object({
   email: z.string().email('Invalid email address'),
   name: z.string().min(1, 'Name is required').max(100),
   avatar: z.string().url().nullable(),
-  roles: z.array(userRoleSchema).default(['user']),
+  roles: z.array(userRoleSchema).default(['ROLE_USER']),
   preferences: userPreferencesSchema,
   isVerified: z.boolean().default(false),
   createdAt: z.date(),

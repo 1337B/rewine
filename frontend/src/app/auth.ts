@@ -1,5 +1,6 @@
 import { useAuthStore } from '@stores/auth.store'
 import { router } from './router'
+import type { UserRole } from '@domain/user/user.types'
 
 /**
  * Initialize authentication state on app startup
@@ -38,16 +39,21 @@ export async function logout(): Promise<void> {
 /**
  * Check if user has required role
  */
-export function hasRole(role: string): boolean {
+export function hasRole(role: UserRole): boolean {
   const authStore = useAuthStore()
-  return authStore.user?.roles?.includes(role) ?? false
+  const userRoles = authStore.user?.roles
+  if (!userRoles) return false
+  return userRoles.includes(role)
 }
 
 /**
  * Check if user has any of the required roles
  */
-export function hasAnyRole(roles: string[]): boolean {
-  return roles.some((role) => hasRole(role))
+export function hasAnyRole(roles: UserRole[]): boolean {
+  const authStore = useAuthStore()
+  const userRoles = authStore.user?.roles
+  if (!userRoles) return false
+  return roles.some((role) => userRoles.includes(role))
 }
 
 /**
