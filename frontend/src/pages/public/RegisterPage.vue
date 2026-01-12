@@ -1,9 +1,24 @@
 <script setup lang="ts">
+/**
+ * RegisterPage - User registration page
+ *
+ * Features:
+ * - Zod schema validation
+ * - Field-level error display
+ * - Password strength indicator
+ * - Loading state handling
+ * - Auto-trim inputs
+ * - Social signup buttons (placeholder)
+ * - i18n support
+ */
+
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@stores/auth.store'
 import { useToast } from '@composables/useToast'
+import { registerUserSchema } from '@domain/user/user.validators'
+import { validateWithSchema, trimFormData } from '@utils/validation'
 import BaseButton from '@components/common/BaseButton.vue'
 import BaseInput from '@components/common/BaseInput.vue'
 import BaseCard from '@components/common/BaseCard.vue'
@@ -19,45 +34,34 @@ const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const formSubmitted = ref(false)
+const fieldErrors = ref<Record<string, string | undefined>>({})
 
 // Computed from store
 const loading = computed(() => authStore.loading)
 const generalError = computed(() => authStore.error)
 
-// Field-level errors with client-side validation
+// Field error getters
 const nameError = computed(() => {
   if (!formSubmitted.value) return undefined
-  if (!name.value) return t('auth.nameRequired')
-  if (name.value.length > 100) return t('auth.nameTooLong')
-  return authStore.getFieldError('name') ?? undefined
+  return fieldErrors.value.name ?? authStore.getFieldError('name') ?? undefined
 })
 
 const emailError = computed(() => {
   if (!formSubmitted.value) return undefined
-  if (!email.value) return t('auth.emailRequired')
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailRegex.test(email.value)) return t('auth.invalidEmail')
-  return authStore.getFieldError('email') ?? undefined
+  return fieldErrors.value.email ?? authStore.getFieldError('email') ?? undefined
 })
 
 const passwordError = computed(() => {
   if (!formSubmitted.value) return undefined
-  if (!password.value) return t('auth.passwordRequired')
-  if (password.value.length < 8) return t('auth.passwordMinLength')
-  if (!/[A-Z]/.test(password.value)) return t('auth.passwordUppercase')
-  if (!/[a-z]/.test(password.value)) return t('auth.passwordLowercase')
-  if (!/[0-9]/.test(password.value)) return t('auth.passwordNumber')
-  return authStore.getFieldError('password') ?? undefined
+  return fieldErrors.value.password ?? authStore.getFieldError('password') ?? undefined
 })
 
 const confirmPasswordError = computed(() => {
   if (!formSubmitted.value) return undefined
-  if (!confirmPassword.value) return t('auth.confirmPasswordRequired')
-  if (password.value !== confirmPassword.value) return t('auth.passwordsMismatch')
-  return authStore.getFieldError('confirmPassword') ?? undefined
+  return fieldErrors.value.confirmPassword ?? authStore.getFieldError('confirmPassword') ?? undefined
 })
 
-// Check if form has any errors
+// Check if form has any field errors
 const hasErrors = computed(() => {
   return !!(nameError.value || emailError.value || passwordError.value || confirmPasswordError.value)
 })
@@ -81,19 +85,35 @@ const passwordStrength = computed(() => {
 
 async function handleSubmit() {
   formSubmitted.value = true
+  fieldErrors.value = {}
   authStore.clearErrors()
 
-  // Check for client-side errors
-  if (hasErrors.value) {
+  // Trim and prepare form data
+  const formData = trimFormData({
+    name: name.value,
+    email: email.value,
+    password: password.value,
+    confirmPassword: confirmPassword.value,
+  })
+
+  // Update refs with trimmed values
+  name.value = formData.name
+  email.value = formData.email
+
+  // Validate with Zod schema
+  const validation = validateWithSchema(registerUserSchema, formData)
+
+  if (!validation.success) {
+    fieldErrors.value = validation.errors
     return
   }
 
   try {
-    await authStore.register(email.value, password.value, name.value, confirmPassword.value)
+    await authStore.register(formData.email, formData.password, formData.name, formData.confirmPassword)
     toast.success(t('auth.registerSuccess'))
     router.push('/')
   } catch {
-    // Error is already handled in store
+    // Error handled in store, show toast
     toast.error(generalError.value || t('auth.registerError'))
   }
 }
@@ -126,41 +146,41 @@ function signupWithFacebook() {
 
       <!-- Registration Form -->
       <form @submit.prevent="handleSubmit" class="space-y-4" novalidate>
-        <div>
-          <BaseInput
-            v-model="name"
-            type="text"
-            :label="t('auth.name')"
-            :placeholder="t('auth.namePlaceholder')"
-            :error="nameError"
-            :disabled="loading"
-            autocomplete="name"
-            required
-          />
-        </div>
+        <BaseInput
+          v-model="name"
+          type="text"
+          name="name"
+          :label="t('auth.name')"
+          :placeholder="t('auth.namePlaceholder')"
+          :error="nameError"
+          :disabled="loading"
+          autocomplete="name"
+          required
+        />
 
-        <div>
-          <BaseInput
-            v-model="email"
-            type="email"
-            :label="t('auth.email')"
-            placeholder="your@email.com"
-            :error="emailError"
-            :disabled="loading"
-            autocomplete="email"
-            required
-          />
-        </div>
+        <BaseInput
+          v-model="email"
+          type="email"
+          name="email"
+          :label="t('auth.email')"
+          placeholder="your@email.com"
+          :error="emailError"
+          :disabled="loading"
+          autocomplete="email"
+          required
+        />
 
         <div>
           <BaseInput
             v-model="password"
             type="password"
+            name="password"
             :label="t('auth.password')"
             placeholder="••••••••"
             :error="passwordError"
             :disabled="loading"
             autocomplete="new-password"
+            :auto-trim="false"
             required
           />
           <!-- Password strength indicator -->
@@ -180,23 +200,24 @@ function signupWithFacebook() {
           </p>
         </div>
 
-        <div>
-          <BaseInput
-            v-model="confirmPassword"
-            type="password"
-            :label="t('auth.confirmPassword')"
-            placeholder="••••••••"
-            :error="confirmPasswordError"
-            :disabled="loading"
-            autocomplete="new-password"
-            required
-          />
-        </div>
+        <BaseInput
+          v-model="confirmPassword"
+          type="password"
+          name="confirmPassword"
+          :label="t('auth.confirmPassword')"
+          placeholder="••••••••"
+          :error="confirmPasswordError"
+          :disabled="loading"
+          autocomplete="new-password"
+          :auto-trim="false"
+          required
+        />
 
         <!-- General error message -->
         <div
           v-if="generalError && !hasErrors"
           class="p-3 bg-red-50 border border-red-200 rounded-lg"
+          role="alert"
         >
           <p class="text-sm text-red-700 flex items-center gap-2">
             <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -222,7 +243,7 @@ function signupWithFacebook() {
           type="submit"
           :loading="loading"
           :disabled="loading"
-          class="w-full"
+          full-width
         >
           {{ t('auth.createAccountButton') }}
         </BaseButton>
