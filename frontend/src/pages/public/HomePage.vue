@@ -70,8 +70,7 @@ const popularGrapes = [
           <div class="flex flex-wrap justify-center gap-4">
             <router-link to="/wines">
               <BaseButton size="lg" class="px-8">
-                <img src="/images/icons/reshot-icon-red-wine-L2HFAY75WG.svg" alt="" class="w-5 h-5 mr-2" />
-                Explore Wines
+                <span class="inline-flex items-center"><img src="/images/icons/reshot-icon-red-wine-L2HFAY75WG.svg" alt="" class="w-5 h-5 mr-2" />Explore Wines</span>
               </BaseButton>
             </router-link>
             <router-link v-if="!isAuthenticated" to="/register">
@@ -81,8 +80,7 @@ const popularGrapes = [
             </router-link>
             <router-link v-else to="/cellar">
               <BaseButton variant="outline" size="lg" class="px-8 !border-wine-300 !text-white hover:!bg-wine-300/20 hover:!border-wine-200">
-                <img src="/images/icons/reshot-icon-vine-cellar-PK3MZL62NG.svg" alt="" class="w-5 h-5 mr-2 invert" />
-                My Cellar
+                <span class="inline-flex items-center"><img src="/images/icons/reshot-icon-vine-cellar-PK3MZL62NG.svg" alt="" class="w-5 h-5 mr-2 invert" />My Cellar</span>
               </BaseButton>
             </router-link>
           </div>
