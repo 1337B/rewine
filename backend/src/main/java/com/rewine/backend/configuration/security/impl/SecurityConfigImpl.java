@@ -25,7 +25,13 @@ public class SecurityConfigImpl implements ISecurityConfig {
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/api-docs/**",
-            "/h2-console/**"
+            "/v3/api-docs/**",
+            "/h2-console/**",
+            "/actuator/**",
+            "/actuator/health/**",
+            "/actuator/health/liveness",
+            "/actuator/health/readiness",
+            "/actuator/info"
     };
 
     @Override
