@@ -28,9 +28,9 @@ public interface IEventRepository extends JpaRepository<EventEntity, UUID> {
     @Query("SELECT e FROM EventEntity e WHERE e.startDate >= :startDate AND e.status = 'published'")
     Page<EventEntity> findUpcomingEvents(@Param("startDate") Instant startDate, Pageable pageable);
 
-    @Query("SELECT e FROM EventEntity e WHERE " +
-           "LOWER(e.title) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           "LOWER(e.description) LIKE LOWER(CONCAT('%', :search, '%'))")
+    @Query("SELECT e FROM EventEntity e WHERE "
+            + "LOWER(e.title) LIKE LOWER(CONCAT('%', :search, '%')) OR "
+            + "LOWER(e.description) LIKE LOWER(CONCAT('%', :search, '%'))")
     Page<EventEntity> search(@Param("search") String search, Pageable pageable);
 }
 

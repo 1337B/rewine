@@ -19,11 +19,11 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(RewineException.class)
     public ResponseEntity<ErrorResponse> handleRewineException(RewineException ex) {
-        logger.error("Application error: {} - {}", ex.getCode(), ex.getMessage(), ex);
+        LOGGER.error("Application error: {} - {}", ex.getCode(), ex.getMessage(), ex);
 
         HttpStatus status = ErrorMapping.getHttpStatus(ex);
         ErrorResponse response = new ErrorResponse(
@@ -38,7 +38,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
-        logger.warn("Validation error: {}", ex.getMessage());
+        LOGGER.warn("Validation error: {}", ex.getMessage());
 
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
-        logger.error("Unexpected error: {}", ex.getMessage(), ex);
+        LOGGER.error("Unexpected error: {}", ex.getMessage(), ex);
 
         ErrorResponse response = new ErrorResponse(
                 ErrorCode.INTERNAL_ERROR.getCode(),
