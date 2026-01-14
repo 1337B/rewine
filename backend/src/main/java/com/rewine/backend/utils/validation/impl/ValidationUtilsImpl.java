@@ -3,6 +3,7 @@ package com.rewine.backend.utils.validation.impl;
 import com.rewine.backend.utils.validation.IValidationUtils;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -20,7 +21,7 @@ public class ValidationUtilsImpl implements IValidationUtils {
 
     @Override
     public boolean isValidEmail(String email) {
-        if (email == null || email.isBlank()) {
+        if (Objects.isNull(email) || email.isBlank()) {
             return false;
         }
         return EMAIL_PATTERN.matcher(email).matches();
@@ -28,7 +29,7 @@ public class ValidationUtilsImpl implements IValidationUtils {
 
     @Override
     public boolean isValidPassword(String password) {
-        if (password == null) {
+        if (Objects.isNull(password)) {
             return false;
         }
         return password.length() >= MIN_PASSWORD_LENGTH;
@@ -36,7 +37,7 @@ public class ValidationUtilsImpl implements IValidationUtils {
 
     @Override
     public boolean isValidUuid(String uuid) {
-        if (uuid == null || uuid.isBlank()) {
+        if (Objects.isNull(uuid) || uuid.isBlank()) {
             return false;
         }
         try {
@@ -49,7 +50,7 @@ public class ValidationUtilsImpl implements IValidationUtils {
 
     @Override
     public boolean isNotBlank(String value) {
-        return value != null && !value.isBlank();
+        return Objects.nonNull(value) && !value.isBlank();
     }
 }
 

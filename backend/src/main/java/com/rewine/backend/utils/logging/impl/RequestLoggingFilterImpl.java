@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -82,7 +83,7 @@ public class RequestLoggingFilterImpl extends OncePerRequestFilter implements IR
 
         // Add user ID if authenticated
         String userId = extractUserId();
-        if (userId != null) {
+        if (Objects.nonNull(userId)) {
             MDC.put(MDC_USER_ID, userId);
         }
     }
@@ -92,7 +93,7 @@ public class RequestLoggingFilterImpl extends OncePerRequestFilter implements IR
      */
     private String extractOrGenerateRequestId(HttpServletRequest request) {
         String requestId = request.getHeader(REQUEST_ID_HEADER);
-        if (requestId == null || requestId.isBlank()) {
+        if (Objects.isNull(requestId) || requestId.isBlank()) {
             requestId = generateRequestId();
         }
         return requestId;
@@ -103,7 +104,7 @@ public class RequestLoggingFilterImpl extends OncePerRequestFilter implements IR
      */
     private String extractUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()
+        if (Objects.nonNull(authentication) && authentication.isAuthenticated()
                 && !"anonymousUser".equals(authentication.getPrincipal())) {
             return authentication.getName();
         }
@@ -116,7 +117,7 @@ public class RequestLoggingFilterImpl extends OncePerRequestFilter implements IR
     private void logRequestStart(HttpServletRequest request) {
         if (shouldLog(request)) {
             String queryString = request.getQueryString();
-            String fullPath = queryString != null
+            String fullPath = Objects.nonNull(queryString)
                     ? request.getRequestURI() + "?" + queryString
                     : request.getRequestURI();
 
@@ -186,13 +187,13 @@ public class RequestLoggingFilterImpl extends OncePerRequestFilter implements IR
      */
     private String getClientIp(HttpServletRequest request) {
         String xForwardedFor = request.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isBlank()) {
+        if (Objects.nonNull(xForwardedFor) && !xForwardedFor.isBlank()) {
             // Return the first IP in the chain
             return xForwardedFor.split(",")[0].trim();
         }
 
         String xRealIp = request.getHeader("X-Real-IP");
-        if (xRealIp != null && !xRealIp.isBlank()) {
+        if (Objects.nonNull(xRealIp) && !xRealIp.isBlank()) {
             return xRealIp;
         }
 
