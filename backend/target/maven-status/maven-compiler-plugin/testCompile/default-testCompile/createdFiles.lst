@@ -1,7 +1,0 @@
-com/rewine/backend/RewineBackendAppTests.class
-com/rewine/backend/utils/ValidationUtilsTest$NotBlankValidation.class
-com/rewine/backend/utils/ValidationUtilsTest.class
-com/rewine/backend/utils/ValidationUtilsTest$PasswordValidation.class
-com/rewine/backend/utils/ValidationUtilsTest$EmailValidation.class
-com/rewine/backend/utils/ValidationUtilsTest$UuidValidation.class
-com/rewine/backend/service/AuthServiceTest.class
