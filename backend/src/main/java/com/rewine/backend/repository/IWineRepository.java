@@ -23,9 +23,9 @@ public interface IWineRepository extends JpaRepository<WineEntity, UUID> {
 
     Page<WineEntity> findByWinery(String winery, Pageable pageable);
 
-    @Query("SELECT w FROM WineEntity w WHERE " +
-           "LOWER(w.name) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           "LOWER(w.winery) LIKE LOWER(CONCAT('%', :search, '%'))")
+    @Query("SELECT w FROM WineEntity w WHERE "
+            + "LOWER(w.name) LIKE LOWER(CONCAT('%', :search, '%')) OR "
+            + "LOWER(w.winery) LIKE LOWER(CONCAT('%', :search, '%'))")
     Page<WineEntity> search(@Param("search") String search, Pageable pageable);
 
     List<WineEntity> findByIdIn(List<UUID> ids);
