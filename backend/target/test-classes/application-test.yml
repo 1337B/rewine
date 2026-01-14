@@ -1,0 +1,35 @@
+# =============================================================================
+# Rewine Backend - Test Configuration
+# =============================================================================
+
+spring:
+  # Database Configuration for Tests
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    database-platform: org.hibernate.dialect.H2Dialect
+
+  # Disable Flyway for tests
+  flyway:
+    enabled: false
+
+  # Disable H2 Console for tests
+  h2:
+    console:
+      enabled: false
+
+# Logging - reduce noise in tests
+logging:
+  level:
+    root: WARN
+    com.rewine: INFO
+    org.springframework.security: WARN
+
