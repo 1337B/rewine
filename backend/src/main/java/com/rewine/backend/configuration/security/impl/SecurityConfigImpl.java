@@ -42,7 +42,9 @@ public class SecurityConfigImpl implements ISecurityConfig {
             "/actuator/health/**",
             "/actuator/health/liveness",
             "/actuator/health/readiness",
-            "/actuator/info"
+            "/actuator/info",
+            "/wines",
+            "/wines/**"
     };
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;

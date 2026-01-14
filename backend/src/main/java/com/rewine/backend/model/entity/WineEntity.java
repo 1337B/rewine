@@ -62,11 +62,11 @@ public class WineEntity {
     private String style;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
+    @Column(columnDefinition = "TEXT")
     private List<String> grapes;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
+    @Column(columnDefinition = "TEXT")
     private List<String> allergens;
 
     @Column(name = "description_es", columnDefinition = "TEXT")
