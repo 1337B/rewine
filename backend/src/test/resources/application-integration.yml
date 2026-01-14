@@ -1,0 +1,58 @@
+# =============================================================================
+# Rewine Backend - Integration Test Configuration
+# =============================================================================
+# This profile is used for integration tests with Testcontainers PostgreSQL.
+# Database connection is configured dynamically by BaseIntegrationTest.
+
+spring:
+  # Database - dynamically configured by Testcontainers
+  datasource:
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 30000
+
+  # JPA Configuration - use create-drop to avoid Flyway circular dependency
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+
+  # Flyway - DISABLED for integration tests to avoid circular dependency
+  # Schema is managed by Hibernate ddl-auto=create-drop
+  flyway:
+    enabled: false
+
+  # Disable SQL init scripts (Hibernate handles schema)
+  sql:
+    init:
+      mode: never
+
+# JWT Configuration for integration tests
+jwt:
+  issuer: rewine-backend-integration-test
+  secret: integration-test-secret-key-for-jwt-signing-minimum-32-chars-long
+  access-token-expiration: 900000
+  refresh-token-expiration: 604800000
+
+# Logging - moderate logging for integration tests
+logging:
+  level:
+    root: WARN
+    com.rewine: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+    org.testcontainers: INFO
+    org.flywaydb: INFO
+
+# Server configuration
+server:
+  port: 0  # Random port for tests
+

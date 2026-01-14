@@ -14,8 +14,8 @@ CREATE TABLE reviews (
     comment         TEXT,
     is_verified     BOOLEAN         DEFAULT FALSE,
     helpful_count   INTEGER         DEFAULT 0,
-    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at      TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_reviews_wine
         FOREIGN KEY (wine_id)
@@ -44,7 +44,7 @@ CREATE INDEX idx_reviews_wine_created ON reviews(wine_id, created_at DESC);
 CREATE TABLE review_likes (
     review_id       UUID            NOT NULL,
     user_id         UUID            NOT NULL,
-    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at      TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (review_id, user_id),
 
@@ -71,8 +71,8 @@ CREATE TABLE review_comments (
     review_id       UUID            NOT NULL,
     user_id         UUID            NOT NULL,
     comment         TEXT            NOT NULL,
-    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at      TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_review_comments_review
         FOREIGN KEY (review_id)

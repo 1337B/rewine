@@ -15,8 +15,8 @@ CREATE TABLE wineries (
     website_url     VARCHAR(500),
     logo_url        VARCHAR(500),
     established     INTEGER,
-    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at      TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Indexes for wineries
@@ -38,8 +38,8 @@ CREATE TABLE wines (
     vintage             INTEGER,
     wine_type           VARCHAR(50)     NOT NULL,
     style               VARCHAR(100),
-    grapes              JSONB,
-    allergens           JSONB,
+    grapes              TEXT,
+    allergens           TEXT,
     description_es      TEXT,
     description_en      TEXT,
     alcohol_content     DECIMAL(4, 2),
@@ -53,8 +53,8 @@ CREATE TABLE wines (
     is_featured         BOOLEAN         DEFAULT FALSE,
     is_active           BOOLEAN         DEFAULT TRUE,
     created_by          UUID,
-    created_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at          TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_wines_winery
         FOREIGN KEY (winery_id)

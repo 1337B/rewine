@@ -14,8 +14,8 @@ CREATE TABLE roles (
     id              BIGSERIAL       PRIMARY KEY,
     name            VARCHAR(50)     NOT NULL UNIQUE,
     description     VARCHAR(255),
-    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at      TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Index for role name lookups
@@ -42,9 +42,9 @@ CREATE TABLE users (
     email_verified  BOOLEAN         NOT NULL DEFAULT FALSE,
     locked          BOOLEAN         NOT NULL DEFAULT FALSE,
     lock_reason     VARCHAR(255),
-    last_login_at   TIMESTAMP,
-    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP
+    last_login_at   TIMESTAMPTZ,
+    created_at      TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Indexes for users
@@ -59,8 +59,6 @@ CREATE INDEX idx_users_created_at ON users(created_at);
 CREATE TABLE user_roles (
     user_id         UUID            NOT NULL,
     role_id         BIGINT          NOT NULL,
-    assigned_at     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    assigned_by     UUID,
 
     PRIMARY KEY (user_id, role_id),
 
@@ -72,12 +70,7 @@ CREATE TABLE user_roles (
     CONSTRAINT fk_user_roles_role
         FOREIGN KEY (role_id)
         REFERENCES roles(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_user_roles_assigned_by
-        FOREIGN KEY (assigned_by)
-        REFERENCES users(id)
-        ON DELETE SET NULL
+        ON DELETE CASCADE
 );
 
 -- Indexes for user_roles
@@ -93,11 +86,11 @@ CREATE TABLE refresh_tokens (
     token_hash              VARCHAR(255)    NOT NULL UNIQUE,
     device_info             VARCHAR(500),
     ip_address              VARCHAR(45),
-    expires_at              TIMESTAMP       NOT NULL,
-    revoked_at              TIMESTAMP,
+    expires_at              TIMESTAMPTZ     NOT NULL,
+    revoked_at              TIMESTAMPTZ,
     revoked_reason          VARCHAR(100),
     replaced_by_token_hash  VARCHAR(255),
-    created_at              TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at              TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_refresh_tokens_user
         FOREIGN KEY (user_id)
