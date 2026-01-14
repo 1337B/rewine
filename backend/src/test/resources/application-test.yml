@@ -22,6 +22,9 @@ spring:
     show-sql: false
     defer-datasource-initialization: false
     database-platform: org.hibernate.dialect.H2Dialect
+    properties:
+      hibernate:
+        format_sql: false
 
   # Disable Flyway for tests
   flyway:
