@@ -87,10 +87,20 @@ mvn spring-boot:run -Dspring-boot.run.profiles=postgres
 
 | Command | Description |
 |---------|-------------|
-| `mvn checkstyle:check` | Check code style (if configured) |
-| `mvn spotbugs:check` | Static analysis (if configured) |
+| `mvn checkstyle:check` | Run Checkstyle analysis |
+| `mvn checkstyle:checkstyle` | Generate Checkstyle report |
+| `mvn jacoco:report` | Generate JaCoCo coverage report |
+| `mvn verify` | Run tests + generate coverage report |
 | `mvn dependency:tree` | Show dependency tree |
 | `mvn versions:display-dependency-updates` | Check for dependency updates |
+
+### Code Coverage Report
+
+After running tests, view the JaCoCo coverage report:
+```bash
+mvn test
+open target/site/jacoco/index.html
+```
 
 ### Cleanup Commands
 

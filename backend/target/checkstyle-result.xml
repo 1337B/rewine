@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="10.12.5">
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/handler/impl/EventHandlerImpl.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/handler/impl/AuthHandlerImpl.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/handler/impl/WineHandlerImpl.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/handler/IAuthHandler.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/handler/IEventHandler.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/handler/IWineHandler.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/configuration/security/ISecurityConfig.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/configuration/security/impl/SecurityConfigImpl.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/configuration/web/impl/WebConfigImpl.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/configuration/web/IWebConfig.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/configuration/openapi/impl/OpenApiConfigImpl.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/configuration/openapi/IOpenApiConfig.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/repository/IReviewRepository.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/repository/IWineRouteRepository.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/repository/IUserRepository.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/repository/IWineRepository.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/repository/IEventRepository.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/utils/converter/impl/BaseConverterImpl.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/utils/converter/IConverter.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/utils/logging/impl/LoggingUtilsImpl.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/utils/logging/ILoggingUtils.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/utils/validation/impl/ValidationUtilsImpl.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/utils/validation/IValidationUtils.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/controller/impl/WineControllerImpl.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/controller/impl/UserControllerImpl.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/controller/impl/AuthControllerImpl.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/controller/impl/EventControllerImpl.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/controller/impl/HealthControllerImpl.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/controller/impl/ReviewControllerImpl.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/controller/impl/WineRouteControllerImpl.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/controller/IReviewController.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/controller/IWineRouteController.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/controller/IAuthController.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/controller/IWineController.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/controller/IEventController.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/controller/IHealthController.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/controller/IUserController.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/model/entity/WineEntity.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/model/entity/UserEntity.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/model/entity/WineRouteEntity.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/model/entity/WineRouteStopEntity.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/model/entity/EventEntity.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/model/entity/ReviewEntity.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/RewineBackendApp.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/service/impl/WineCommandServiceImpl.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/service/impl/WineRouteServiceImpl.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/service/impl/ReviewServiceImpl.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/service/impl/WineQueryServiceImpl.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/service/impl/EventServiceImpl.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/service/impl/UserServiceImpl.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/service/impl/AuthServiceImpl.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/service/IUserService.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/service/IReviewService.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/service/IWineQueryService.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/service/IWineCommandService.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/service/IEventService.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/service/IAuthService.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/service/IWineRouteService.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/exception/ErrorCode.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/exception/RewineException.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/exception/GlobalExceptionHandler.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/main/java/com/rewine/backend/exception/ErrorMapping.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/test/java/com/rewine/backend/RewineBackendAppTests.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/test/java/com/rewine/backend/utils/ValidationUtilsTest.java">
+</file>
+<file name="/Users/cristhianbielaszczuk/rewine/backend/src/test/java/com/rewine/backend/service/AuthServiceTest.java">
+</file>
+</checkstyle>
