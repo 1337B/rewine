@@ -127,5 +127,16 @@ public interface IReviewRepository extends JpaRepository<ReviewEntity, UUID> {
      */
     @Query("SELECT r FROM ReviewEntity r WHERE r.wine.id IN :wineIds")
     List<ReviewEntity> findByWineIdIn(@Param("wineIds") List<UUID> wineIds);
+
+    /**
+     * Counts reviews grouped by rating (rounded to integer) for a wine.
+     * Returns an array where index 0 = rating value, index 1 = count.
+     *
+     * @param wineId the wine ID
+     * @return list of Object arrays [rating, count]
+     */
+    @Query("SELECT CAST(FLOOR(r.rating) AS int), COUNT(r) FROM ReviewEntity r "
+            + "WHERE r.wine.id = :wineId GROUP BY CAST(FLOOR(r.rating) AS int)")
+    List<Object[]> countByRatingDistribution(@Param("wineId") UUID wineId);
 }
 
