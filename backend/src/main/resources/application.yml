@@ -14,17 +14,18 @@ spring:
     password:
     driver-class-name: org.h2.Driver
 
-  # SQL initialization - disabled, let Hibernate manage schema
+  # SQL initialization - load only data after Hibernate creates schema
   sql:
     init:
-      mode: never
+      mode: always
+      data-locations: classpath:data-h2.sql
 
   # JPA Configuration
   jpa:
     hibernate:
       ddl-auto: create-drop
     show-sql: false
-    defer-datasource-initialization: false
+    defer-datasource-initialization: true
     properties:
       hibernate:
         format_sql: true

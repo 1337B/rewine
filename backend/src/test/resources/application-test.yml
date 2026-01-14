@@ -10,11 +10,17 @@ spring:
     password:
     driver-class-name: org.h2.Driver
 
+  # Disable SQL init for tests (let Hibernate handle schema)
+  sql:
+    init:
+      mode: never
+
   # JPA Configuration
   jpa:
     hibernate:
       ddl-auto: create-drop
     show-sql: false
+    defer-datasource-initialization: false
     database-platform: org.hibernate.dialect.H2Dialect
 
   # Disable Flyway for tests
