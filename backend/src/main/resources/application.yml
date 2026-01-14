@@ -14,19 +14,17 @@ spring:
     password:
     driver-class-name: org.h2.Driver
 
-  # SQL initialization - load data after Hibernate creates schema
+  # SQL initialization - disabled, let Hibernate manage schema
   sql:
     init:
-      mode: always
-      schema-locations: []
-      data-locations: classpath:data-h2.sql
+      mode: never
 
   # JPA Configuration
   jpa:
     hibernate:
       ddl-auto: create-drop
     show-sql: false
-    defer-datasource-initialization: true
+    defer-datasource-initialization: false
     properties:
       hibernate:
         format_sql: true
@@ -124,9 +122,10 @@ springdoc:
 
 # JWT Configuration
 jwt:
+  issuer: rewine-backend
   secret: ${JWT_SECRET:rewine-development-secret-key-change-in-production-minimum-256-bits}
-  access-token-expiration: 900000    # 15 minutes
-  refresh-token-expiration: 604800000 # 7 days
+  access-token-expiration: 900000    # 15 minutes in milliseconds
+  refresh-token-expiration: 604800000 # 7 days in milliseconds
 
 # CORS Configuration
 cors:
