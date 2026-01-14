@@ -10,6 +10,8 @@ public enum ErrorCode {
     VALIDATION_ERROR("E1001", "Validation failed"),
     RESOURCE_NOT_FOUND("E1002", "Resource not found"),
     RESOURCE_ALREADY_EXISTS("E1003", "Resource already exists"),
+    NOT_FOUND("E1004", "Not found"),
+    CONFLICT("E1005", "Conflict"),
 
     // Authentication errors (2xxx)
     AUTHENTICATION_FAILED("E2000", "Authentication failed"),

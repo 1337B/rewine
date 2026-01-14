@@ -26,6 +26,13 @@ spring:
     console:
       enabled: false
 
+# JWT Configuration for tests
+jwt:
+  issuer: rewine-backend-test
+  secret: test-secret-key-for-jwt-signing-minimum-32-chars-long
+  access-token-expiration: 900000
+  refresh-token-expiration: 604800000
+
 # Logging - reduce noise in tests
 logging:
   level:

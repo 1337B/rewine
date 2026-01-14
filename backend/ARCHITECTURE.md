@@ -533,46 +533,162 @@ Query parameters for pagination:
 
 ## Security Architecture
 
-### Authentication
+### Authentication Flow
 
-- **Method**: JWT (JSON Web Tokens)
-- **Access Token**: 15 minutes expiry, sent in Authorization header
-- **Refresh Token**: 7 days expiry, HttpOnly cookie
+The application uses JWT (JSON Web Token) authentication with refresh token rotation for enhanced security.
+
+```
+┌─────────┐                 ┌─────────────┐                 ┌──────────┐
+│ Client  │                 │   Backend   │                 │ Database │
+└────┬────┘                 └──────┬──────┘                 └────┬─────┘
+     │                             │                              │
+     │  POST /auth/login           │                              │
+     │  {username, password}       │                              │
+     │────────────────────────────▶│                              │
+     │                             │   Validate credentials       │
+     │                             │─────────────────────────────▶│
+     │                             │◀─────────────────────────────│
+     │                             │                              │
+     │                             │   Generate JWT tokens        │
+     │                             │   Store refresh token hash   │
+     │                             │─────────────────────────────▶│
+     │                             │                              │
+     │  {accessToken, refreshToken}│                              │
+     │◀────────────────────────────│                              │
+     │                             │                              │
+     │  GET /api/protected         │                              │
+     │  Authorization: Bearer xxx  │                              │
+     │────────────────────────────▶│                              │
+     │                             │   Validate JWT               │
+     │                             │   Extract user context       │
+     │  Response                   │                              │
+     │◀────────────────────────────│                              │
+     │                             │                              │
+     │  POST /auth/refresh         │                              │
+     │  {refreshToken}             │                              │
+     │────────────────────────────▶│                              │
+     │                             │   Validate refresh token     │
+     │                             │   Token rotation (revoke old)│
+     │                             │─────────────────────────────▶│
+     │  {newAccessToken,           │                              │
+     │   newRefreshToken}          │                              │
+     │◀────────────────────────────│                              │
+```
+
+### Token Configuration
+
+| Token Type | Expiration | Storage |
+|------------|------------|---------|
+| Access Token | 15 minutes | Client memory/localStorage |
+| Refresh Token | 7 days | Client storage, hash in DB |
+
+### JWT Token Structure
+
+**Access Token Claims:**
+```json
+{
+  "sub": "username",
+  "userId": "550e8400-e29b-41d4-a716-446655440000",
+  "email": "user@example.com",
+  "roles": ["ROLE_USER"],
+  "iss": "rewine-backend",
+  "iat": 1704067200,
+  "exp": 1704068100
+}
+```
+
+### Security Components
+
+| Component | Location | Responsibility |
+|-----------|----------|----------------|
+| `JwtProperties` | `configuration/properties/` | JWT configuration (secret, expiration) |
+| `JwtAuthenticationFilter` | `configuration/security/` | Extract and validate JWT from requests |
+| `JwtAuthenticationEntryPoint` | `configuration/security/` | Handle 401 Unauthorized responses |
+| `JwtTokenServiceImpl` | `service/impl/` | Generate and validate tokens |
+| `UserDetailsServiceImpl` | `service/impl/` | Load user details for authentication |
+| `SecurityConfigImpl` | `configuration/security/impl/` | Spring Security configuration |
 
 ### Authorization
 
-Role-based access control (RBAC):
+Role-based access control (RBAC) with method-level security:
 
 | Role | Code | Permissions |
 |------|------|-------------|
-| Admin | `ROLE_ADMIN` | Full access |
-| Moderator | `ROLE_MODERATOR` | Review moderation, user management |
+| Admin | `ROLE_ADMIN` | Full access to all resources |
+| Moderator | `ROLE_MODERATOR` | Review moderation, content management |
 | Partner | `ROLE_PARTNER` | Manage own wines, events, routes |
-| User | `ROLE_USER` | Browse, review, manage cellar |
+| User | `ROLE_USER` | Browse, review, manage personal cellar |
+
+### Method-Level Security Examples
+
+```java
+// Only ADMIN can access
+@PreAuthorize("hasRole('ADMIN')")
+public ResponseEntity<?> deleteUser(UUID userId) { ... }
+
+// ADMIN or MODERATOR can access
+@PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
+public ResponseEntity<?> moderateReview(UUID reviewId) { ... }
+
+// User can only access their own data
+@PreAuthorize("#userId == authentication.principal.id or hasRole('ADMIN')")
+public ResponseEntity<?> getUserProfile(UUID userId) { ... }
+```
+
+### Refresh Token Rotation
+
+For enhanced security, refresh tokens are rotated on each use:
+
+1. Client sends refresh token
+2. Server validates token hash exists in DB and is not expired/revoked
+3. Server generates new access token AND new refresh token
+4. Old refresh token is marked as revoked with `replaced_by_token_hash`
+5. New tokens returned to client
+
+This prevents refresh token reuse attacks.
 
 ### Security Configuration
 
 ```java
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfigImpl implements ISecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint))
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/health", "/version", "/auth/**").permitAll()
+                .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated())
+            .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 }
 ```
+
+### Password Security
+
+- **Algorithm**: BCrypt
+- **Strength**: 10 rounds (default)
+- **Storage**: Only hashed passwords stored, never plaintext
+
+### Request Correlation
+
+All requests include correlation IDs for tracing:
+
+- Header: `X-Request-Id`
+- MDC: `requestId`, `userId`, `path`, `method`
+- Logged with every request/response
 
 ---
 
