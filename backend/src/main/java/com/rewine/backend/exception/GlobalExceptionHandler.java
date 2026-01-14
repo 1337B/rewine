@@ -6,8 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -15,13 +13,15 @@ import java.util.Map;
 
 /**
  * Global exception handler for REST controllers.
+ *
+ * @deprecated Use {@link com.rewine.backend.controller.advice.impl.GlobalExceptionHandlerImpl} instead.
+ *             This class is kept for backwards compatibility and will be removed in a future version.
  */
-@RestControllerAdvice
+@Deprecated(since = "0.0.2", forRemoval = true)
 public class GlobalExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(RewineException.class)
     public ResponseEntity<ErrorResponse> handleRewineException(RewineException ex) {
         LOGGER.error("Application error: {} - {}", ex.getCode(), ex.getMessage(), ex);
 
@@ -36,7 +36,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(response);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
         LOGGER.warn("Validation error: {}", ex.getMessage());
 
@@ -58,7 +57,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(response);
     }
 
-    @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
         LOGGER.error("Unexpected error: {}", ex.getMessage(), ex);
 
@@ -74,7 +72,10 @@ public class GlobalExceptionHandler {
 
     /**
      * Error response DTO.
+     *
+     * @deprecated Use {@link com.rewine.backend.dto.common.ApiErrorResponse} instead.
      */
+    @Deprecated(since = "0.0.2", forRemoval = true)
     public record ErrorResponse(
             String code,
             String message,
