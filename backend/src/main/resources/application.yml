@@ -7,18 +7,26 @@ spring:
     name: rewine-backend
     version: 0.0.1-SNAPSHOT
 
-  # Database Configuration
+  # Database Configuration (H2 for development)
   datasource:
     url: jdbc:h2:mem:rewinedb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
     username: sa
     password:
     driver-class-name: org.h2.Driver
 
+  # SQL initialization - load data after Hibernate creates schema
+  sql:
+    init:
+      mode: always
+      schema-locations: []
+      data-locations: classpath:data-h2.sql
+
   # JPA Configuration
   jpa:
     hibernate:
       ddl-auto: create-drop
     show-sql: false
+    defer-datasource-initialization: true
     properties:
       hibernate:
         format_sql: true
@@ -29,6 +37,8 @@ spring:
     console:
       enabled: true
       path: /h2-console
+      settings:
+        web-allow-others: false
 
   # Flyway Configuration - disabled for H2, enable for PostgreSQL
   flyway:

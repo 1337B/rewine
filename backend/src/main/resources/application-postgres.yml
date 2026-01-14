@@ -1,6 +1,16 @@
 # =============================================================================
 # Rewine Backend - PostgreSQL Configuration
 # =============================================================================
+# Activate this profile with: spring.profiles.active=postgres
+# Or via environment: SPRING_PROFILES_ACTIVE=postgres
+#
+# Required environment variables:
+#   DB_HOST     - PostgreSQL host (default: localhost)
+#   DB_PORT     - PostgreSQL port (default: 5432)
+#   DB_NAME     - Database name (default: rewinedb)
+#   DB_USER     - Database user (default: rewine)
+#   DB_PASSWORD - Database password (default: rewine123)
+# =============================================================================
 
 spring:
   # PostgreSQL Database Configuration
@@ -15,22 +25,31 @@ spring:
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
+      pool-name: RewineHikariPool
 
   # JPA Configuration
   jpa:
     hibernate:
       ddl-auto: validate
     show-sql: false
+    open-in-view: false
     properties:
       hibernate:
         format_sql: true
+        jdbc:
+          batch_size: 25
+        order_inserts: true
+        order_updates: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
   # Flyway Configuration - enabled for PostgreSQL
   flyway:
     enabled: true
     baseline-on-migrate: true
+    baseline-version: 0
     locations: classpath:db/migration
+    validate-on-migrate: true
+    clean-disabled: true
 
   # Disable H2 Console for PostgreSQL
   h2:
@@ -43,4 +62,6 @@ logging:
     root: INFO
     com.rewine: INFO
     org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
+    org.flywaydb: INFO
 
