@@ -1,8 +1,13 @@
 package com.rewine.backend.configuration.web.impl;
 
 import com.rewine.backend.configuration.web.IWebConfig;
+import com.rewine.backend.utils.logging.IRequestLoggingFilter;
+import com.rewine.backend.utils.logging.impl.RequestLoggingFilterImpl;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -11,6 +16,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 @Configuration
 public class WebConfigImpl implements IWebConfig, WebMvcConfigurer {
+
+    private final RequestLoggingFilterImpl requestLoggingFilter;
 
     @Value("${cors.allowed-origins:http://localhost:3000}")
     private String allowedOrigins;
@@ -23,6 +30,10 @@ public class WebConfigImpl implements IWebConfig, WebMvcConfigurer {
 
     @Value("${cors.allow-credentials:true}")
     private boolean allowCredentials;
+
+    public WebConfigImpl(RequestLoggingFilterImpl requestLoggingFilter) {
+        this.requestLoggingFilter = requestLoggingFilter;
+    }
 
     @Override
     public String[] getAllowedOrigins() {
@@ -40,7 +51,19 @@ public class WebConfigImpl implements IWebConfig, WebMvcConfigurer {
                 .allowedOrigins(getAllowedOrigins())
                 .allowedMethods(getAllowedMethods())
                 .allowedHeaders(allowedHeaders.split(","))
-                .allowCredentials(allowCredentials);
+                .allowCredentials(allowCredentials)
+                .exposedHeaders(IRequestLoggingFilter.REQUEST_ID_HEADER);
+    }
+
+    @Bean
+    @Override
+    public FilterRegistrationBean<RequestLoggingFilterImpl> requestLoggingFilterRegistration() {
+        FilterRegistrationBean<RequestLoggingFilterImpl> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(requestLoggingFilter);
+        registrationBean.addUrlPatterns("/*");
+        registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        registrationBean.setName("requestLoggingFilter");
+        return registrationBean;
     }
 }
 
