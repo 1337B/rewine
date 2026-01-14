@@ -7,26 +7,28 @@ This document outlines the security architecture, authentication model, and best
 ## Table of Contents
 
 1. [Authentication Model](#authentication-model)
-2. [Token Storage Strategy](#token-storage-strategy)
-3. [CORS Configuration](#cors-configuration)
-4. [CSRF Protection](#csrf-protection)
-5. [Secrets Management](#secrets-management)
-6. [Security Headers](#security-headers)
-7. [Input Validation](#input-validation)
-8. [Role-Based Access Control](#role-based-access-control)
+2. [Backend JWT Implementation](#backend-jwt-implementation)
+3. [Token Storage Strategy](#token-storage-strategy)
+4. [Refresh Token Rotation](#refresh-token-rotation)
+5. [CORS Configuration](#cors-configuration)
+6. [CSRF Protection](#csrf-protection)
+7. [Secrets Management](#secrets-management)
+8. [Security Headers](#security-headers)
+9. [Input Validation](#input-validation)
+10. [Role-Based Access Control](#role-based-access-control)
 
 ---
 
 ## Authentication Model
 
-Rewine uses **JWT (JSON Web Token)** based authentication with a dual-token strategy:
+Rewine uses **JWT (JSON Web Token)** based authentication with a dual-token strategy and refresh token rotation.
 
 ### Token Types
 
 | Token | Purpose | Lifetime | Storage |
 |-------|---------|----------|---------|
-| **Access Token** | Authorize API requests | 15 minutes | Memory (JavaScript) |
-| **Refresh Token** | Obtain new access tokens | 7 days | HttpOnly Cookie |
+| **Access Token** | Authorize API requests | 15 minutes | Memory (JavaScript) or Client storage |
+| **Refresh Token** | Obtain new access tokens | 7 days | Client storage, hash stored in DB |
 
 ### Authentication Flow
 
@@ -38,48 +40,92 @@ Rewine uses **JWT (JSON Web Token)** based authentication with a dual-token stra
      │  1. Enter credentials        │                              │
      │─────────────────────────────▶│                              │
      │                              │                              │
-     │                              │  2. POST /auth/login         │
+     │                              │  2. POST /api/v1/auth/login  │
      │                              │─────────────────────────────▶│
      │                              │                              │
      │                              │  3. Validate credentials     │
+     │                              │     (BCrypt password check)  │
      │                              │                              │
-     │                              │  4. Access token (body)      │
-     │                              │     + Refresh token (cookie) │
+     │                              │  4. Generate tokens          │
+     │                              │     Store refresh hash in DB │
+     │                              │                              │
+     │                              │  5. {accessToken,            │
+     │                              │      refreshToken, user}     │
      │                              │◀─────────────────────────────│
      │                              │                              │
-     │  5. Store access token       │                              │
-     │     in memory                │                              │
+     │  6. Store tokens             │                              │
      │                              │                              │
-     │  6. Subsequent requests      │                              │
+     │  7. Subsequent requests      │                              │
      │─────────────────────────────▶│                              │
-     │                              │  7. Request + Bearer token   │
+     │                              │  8. Authorization: Bearer xxx│
      │                              │─────────────────────────────▶│
      │                              │                              │
+     │                              │  9. JWT validated,           │
+     │                              │     user context extracted   │
+     │                              │                              │
 ```
 
-### Token Refresh Flow
+---
 
+## Backend JWT Implementation
+
+### Configuration Properties
+
+```yaml
+# application.yml
+jwt:
+  issuer: rewine-backend
+  secret: ${JWT_SECRET:your-256-bit-secret-key-minimum-32-chars}
+  access-token-expiration: 900000    # 15 minutes in milliseconds
+  refresh-token-expiration: 604800000 # 7 days in milliseconds
 ```
-┌─────────┐                    ┌─────────┐                    ┌─────────┐
-│Frontend │                    │  API    │                    │ Backend │
-└────┬────┘                    └────┬────┘                    └────┬────┘
-     │                              │                              │
-     │  1. Request returns 401      │                              │
-     │◀─────────────────────────────│                              │
-     │                              │                              │
-     │  2. POST /auth/refresh       │                              │
-     │     (refresh token in cookie)│                              │
-     │─────────────────────────────▶│─────────────────────────────▶│
-     │                              │                              │
-     │                              │  3. Validate refresh token   │
-     │                              │                              │
-     │  4. New access token         │                              │
-     │◀─────────────────────────────│◀─────────────────────────────│
-     │                              │                              │
-     │  5. Retry original request   │                              │
-     │─────────────────────────────▶│                              │
-     │                              │                              │
+
+### JWT Token Structure
+
+**Access Token Claims:**
+```json
+{
+  "sub": "username",
+  "userId": "550e8400-e29b-41d4-a716-446655440000",
+  "email": "user@example.com",
+  "roles": ["ROLE_USER", "ROLE_ADMIN"],
+  "iss": "rewine-backend",
+  "iat": 1704067200,
+  "exp": 1704068100
+}
 ```
+
+### Key Security Components
+
+| Component | Description |
+|-----------|-------------|
+| `JwtProperties` | Configuration properties for JWT (secret, expiration times) |
+| `JwtTokenServiceImpl` | Generates and validates JWT tokens |
+| `JwtAuthenticationFilter` | Spring Security filter that extracts and validates JWT from requests |
+| `JwtAuthenticationEntryPoint` | Handles 401 Unauthorized responses with proper error format |
+| `UserDetailsServiceImpl` | Loads user details from database for authentication |
+| `AuthServiceImpl` | Handles login, register, refresh, and logout operations |
+
+### Password Hashing
+
+Passwords are hashed using BCrypt:
+
+```java
+@Bean
+public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder(); // Default strength: 10
+}
+```
+
+### API Endpoints
+
+| Endpoint | Method | Description | Auth Required |
+|----------|--------|-------------|---------------|
+| `/api/v1/auth/register` | POST | Register new user | No |
+| `/api/v1/auth/login` | POST | Login, get tokens | No |
+| `/api/v1/auth/refresh` | POST | Refresh access token | No (uses refresh token) |
+| `/api/v1/auth/logout` | POST | Revoke refresh token | No |
+| `/api/v1/auth/me` | GET | Get current user profile | Yes |
 
 ---
 
@@ -90,17 +136,17 @@ Rewine uses **JWT (JSON Web Token)** based authentication with a dual-token stra
 | Token | Storage | Rationale |
 |-------|---------|-----------|
 | Access Token | In-memory (Pinia store) | Not accessible to XSS, lost on page reload |
-| Refresh Token | HttpOnly Secure cookie | Not accessible to JavaScript |
+| Refresh Token | sessionStorage or HttpOnly Cookie | Limited exposure |
 
-### Why Not localStorage?
+### Why Not localStorage for Access Tokens?
 
 ```
-❌ localStorage/sessionStorage for tokens
+❌ localStorage/sessionStorage for access tokens
    - Vulnerable to XSS attacks
    - Any script can read the token
    - Persists across tabs (potential security issue)
 
-✅ In-memory + HttpOnly cookie
+✅ In-memory + HttpOnly cookie (for refresh)
    - Access token in memory: XSS can't directly steal it
    - Refresh token HttpOnly: JavaScript cannot access
    - Short-lived access token limits exposure window
@@ -130,18 +176,49 @@ export const useAuthStore = defineStore('auth', () => {
 })
 ```
 
-### Implementation (Backend - Planned)
+---
 
-```java
-// Set refresh token as HttpOnly cookie
-ResponseCookie cookie = ResponseCookie.from("refreshToken", token)
-    .httpOnly(true)
-    .secure(true)           // HTTPS only
-    .path("/api/auth")      // Limited scope
-    .maxAge(Duration.ofDays(7))
-    .sameSite("Strict")
-    .build();
+## Refresh Token Rotation
+
+For enhanced security, refresh tokens are rotated on each use. This prevents token reuse attacks.
+
+### How It Works
+
+1. Client sends refresh token to `/api/v1/auth/refresh`
+2. Backend validates:
+   - Token hash exists in database
+   - Token is not expired
+   - Token is not revoked
+3. Backend generates **new** access token AND **new** refresh token
+4. Old refresh token is marked as revoked with `replaced_by_token_hash`
+5. New tokens returned to client
+
+### Database Schema
+
+```sql
+CREATE TABLE refresh_tokens (
+    id BIGSERIAL PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(id),
+    token_hash VARCHAR(255) NOT NULL,      -- SHA-256 hash of token
+    device_info VARCHAR(500),
+    ip_address VARCHAR(45),
+    expires_at TIMESTAMP NOT NULL,
+    revoked_at TIMESTAMP,                   -- NULL if active
+    revoked_reason VARCHAR(100),
+    replaced_by_token_hash VARCHAR(255),   -- For rotation tracking
+    created_at TIMESTAMP DEFAULT NOW()
+);
 ```
+
+### Token Revocation Reasons
+
+| Reason | Description |
+|--------|-------------|
+| `User logout` | User explicitly logged out |
+| `Token rotation` | Token was replaced by a new one |
+| `Security concern` | Suspicious activity detected |
+| `Password changed` | User changed their password |
+| `Revoked by admin` | Administrator revoked the token |
 
 ---
 

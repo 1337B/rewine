@@ -629,6 +629,192 @@ npm install
 
 ---
 
+## Backend Issues
+
+### Java Version Mismatch
+
+**Symptoms:**
+- Build fails with `invalid source release: 21`
+- `UnsupportedClassVersionError` at runtime
+
+**Solution:**
+
+```bash
+# Check Java version
+java -version
+# Should show: openjdk version "21.x.x"
+
+# Check Maven uses correct Java
+mvn -version
+
+# If wrong version, use SDKMAN (macOS/Linux)
+sdk install java 21.0.5-tem
+sdk use java 21.0.5-tem
+
+# Or set JAVA_HOME manually
+export JAVA_HOME=/path/to/java21
+```
+
+---
+
+### Backend Port Already in Use
+
+**Symptoms:**
+- `Web server failed to start. Port 8080 was already in use.`
+
+**Solution (macOS/Linux):**
+
+```bash
+# Find process using port 8080
+lsof -i :8080
+
+# Kill the process
+kill -9 <PID>
+
+# Or run on different port
+mvn spring-boot:run -Dspring-boot.run.arguments=--server.port=8081
+```
+
+**Solution (Windows):**
+
+```powershell
+netstat -ano | findstr :8080
+taskkill /PID <PID> /F
+```
+
+---
+
+### JWT Secret Not Configured
+
+**Symptoms:**
+- `IllegalStateException: JWT secret is not configured`
+- Application fails to start
+
+**Solution:**
+
+```bash
+# Option 1: Set environment variable
+export JWT_SECRET="your-very-long-secret-key-at-least-32-characters"
+
+# Option 2: Pass as argument
+mvn spring-boot:run -Djwt.secret="your-very-long-secret-key-at-least-32-characters"
+
+# Option 3: Add to application.yml (development only)
+# jwt:
+#   secret: your-very-long-secret-key-at-least-32-characters
+```
+
+---
+
+### Database Connection Failed
+
+**Symptoms:**
+- `Connection refused to host: localhost, port: 5432`
+- `HikariPool-1 - Connection is not available`
+
+**Solution for H2 (default):**
+```bash
+# H2 should work out of the box
+# Access H2 Console at: http://localhost:8080/api/v1/h2-console
+# JDBC URL: jdbc:h2:mem:rewinedb
+# Username: sa
+# Password: (empty)
+```
+
+**Solution for PostgreSQL:**
+```bash
+# 1. Check if PostgreSQL is running
+docker ps | grep postgres
+
+# 2. Start PostgreSQL container if not running
+docker run -d \
+  --name rewine-postgres \
+  -e POSTGRES_DB=rewinedb \
+  -e POSTGRES_USER=rewine \
+  -e POSTGRES_PASSWORD=rewine123 \
+  -p 5432:5432 \
+  postgres:15
+
+# 3. Run with postgres profile
+mvn spring-boot:run -Dspring-boot.run.profiles=postgres
+```
+
+---
+
+### Checkstyle Errors
+
+**Symptoms:**
+- `Failed to execute goal org.apache.maven.plugins:maven-checkstyle-plugin`
+- Build fails with checkstyle violations
+
+**Solution:**
+
+```bash
+# See detailed checkstyle report
+mvn checkstyle:check
+
+# Common fixes:
+# - Remove star imports (import com.example.*)
+# - Use constants for magic numbers
+# - Fix indentation (4 spaces)
+# - Add missing braces
+
+# Skip checkstyle temporarily (not recommended)
+mvn clean install -Dcheckstyle.skip=true
+```
+
+---
+
+### Circular Dependency in Spring
+
+**Symptoms:**
+- `BeanCurrentlyInCreationException`
+- `Requested bean is currently in creation`
+
+**Solution:**
+
+```java
+// Use @Lazy annotation to break the cycle
+public class ServiceA {
+    private final ServiceB serviceB;
+    
+    public ServiceA(@Lazy ServiceB serviceB) {
+        this.serviceB = serviceB;
+    }
+}
+```
+
+---
+
+### Backend Build Commands Reference
+
+```bash
+# Clean build
+mvn clean install
+
+# Build without tests
+mvn clean install -DskipTests
+
+# Run tests only
+mvn test
+
+# Generate coverage report
+mvn test jacoco:report
+# View at: target/site/jacoco/index.html
+
+# Check code style
+mvn checkstyle:check
+
+# Run application
+mvn spring-boot:run
+
+# Clear Maven cache
+rm -rf ~/.m2/repository/com/rewine
+mvn clean install -U
+```
+
+---
+
 ## Getting Help
 
 If you've tried the above solutions and still have issues:
@@ -638,14 +824,15 @@ If you've tried the above solutions and still have issues:
 3. Create a detailed issue with:
    - Error message
    - Steps to reproduce
-   - Environment (OS, Node version)
+   - Environment (OS, Node/Java version)
    - Relevant configuration
 
 ---
 
 ## Related Documentation
 
-- [Frontend Guide](FRONTEND.md) - Development guide
+- [Frontend Guide](FRONTEND.md) - Frontend development guide
+- [Backend Guide](../backend/README.md) - Backend development guide
 - [Environments](ENVIRONMENTS.md) - Environment configuration
 - [Architecture](ARCHITECTURE.md) - System architecture
 

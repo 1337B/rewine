@@ -25,7 +25,7 @@ Rewine is a comprehensive wine discovery and management platform designed for wi
 ```
 rewine/
 ├── frontend/          # Vue 3 SPA (TypeScript, Vite, Tailwind)
-├── backend/           # [Planned] Spring Boot REST API
+├── backend/           # Spring Boot REST API (Java 21)
 ├── infra/             # [Planned] Docker, Kubernetes, CI/CD configs
 ├── docs/              # Project documentation
 └── README.md          # This file
@@ -36,7 +36,7 @@ rewine/
 | Component | Status |
 |-----------|--------|
 | Frontend | ✅ Implemented |
-| Backend | 🔜 Planned |
+| Backend | ✅ Implemented |
 | Infrastructure | 🔜 Planned |
 
 ---
@@ -45,16 +45,15 @@ rewine/
 
 ### Prerequisites
 
-- **Node.js**: v20.x or higher
+- **Node.js**: v20.x or higher (for frontend)
 - **npm**: v10.x or higher (comes with Node.js)
+- **Java**: 21 (LTS) (for backend)
+- **Maven**: 3.9+ (for backend)
 - **Docker**: (optional) for containerized builds
 
-### Local Development
+### Frontend Development
 
 ```bash
-# Clone the repository
-cd rewine
-
 # Navigate to frontend
 cd frontend
 
@@ -68,11 +67,72 @@ npm run dev:mock
 npm run dev
 ```
 
-The application will be available at `http://localhost:3000`.
+The frontend will be available at `http://localhost:3000`.
 
-### Running Tests
+### Backend Development
 
 ```bash
+# Navigate to backend
+cd backend
+
+# Build the project
+mvn clean install
+
+# Run with H2 in-memory database (default)
+mvn spring-boot:run
+
+# Or run with PostgreSQL
+mvn spring-boot:run -Dspring-boot.run.profiles=postgres
+```
+
+The API will be available at `http://localhost:8080/api/v1`.
+
+### Full Stack Development
+
+```bash
+# Terminal 1: Start backend
+cd backend
+mvn spring-boot:run
+
+# Terminal 2: Start frontend (without mocks)
+cd frontend
+npm run dev
+```
+
+---
+
+## API Endpoints
+
+### Authentication (Backend)
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/auth/register` | POST | Register new user |
+| `/api/v1/auth/login` | POST | Login and get JWT tokens |
+| `/api/v1/auth/refresh` | POST | Refresh access token |
+| `/api/v1/auth/logout` | POST | Revoke refresh token |
+| `/api/v1/auth/me` | GET | Get current user profile |
+
+### Other Endpoints
+
+| Endpoint | Description |
+|----------|-------------|
+| `/api/v1/health` | Health check |
+| `/api/v1/version` | Application version |
+| `/api/v1/swagger-ui.html` | Swagger UI (API docs) |
+| `/api/v1/actuator/health` | Actuator health |
+
+For full API documentation, see [Backend README](backend/README.md) or access Swagger UI when running.
+
+---
+
+## Running Tests
+
+### Frontend Tests
+
+```bash
+cd frontend
+
 # Unit tests
 npm run test:unit
 
@@ -84,9 +144,31 @@ npm run test:e2e:setup   # First time only
 npm run test:e2e
 ```
 
-### Building for Production
+### Backend Tests
 
 ```bash
+cd backend
+
+# Run all tests
+mvn test
+
+# Run with coverage report
+mvn test jacoco:report
+# View report at: target/site/jacoco/index.html
+
+# Run checkstyle
+mvn checkstyle:check
+```
+
+---
+
+## Building for Production
+
+### Frontend Build
+
+```bash
+cd frontend
+
 # Type-check and build
 npm run build
 
@@ -95,9 +177,18 @@ npm run preview
 
 # Build Docker image
 npm run docker:build
+```
 
-# Run Docker container
-npm run docker:run
+### Backend Build
+
+```bash
+cd backend
+
+# Build JAR
+mvn clean package
+
+# Run JAR
+java -jar target/rewine-backend-0.0.1-SNAPSHOT.jar
 ```
 
 ---
@@ -108,7 +199,9 @@ npm run docker:run
 |----------|-------------|
 | [Architecture](docs/ARCHITECTURE.md) | System overview, layers, data flow, diagrams |
 | [Frontend Guide](docs/FRONTEND.md) | Tech stack, conventions, state management, testing |
-| [Security](docs/SECURITY.md) | Authentication, token handling, CORS, headers |
+| [Backend Guide](backend/README.md) | API endpoints, commands, configuration |
+| [Backend Architecture](backend/ARCHITECTURE.md) | Backend layers, security, database design |
+| [Security](docs/SECURITY.md) | Authentication, JWT tokens, CORS, headers |
 | [Development Workflow](docs/DEVELOPMENT_WORKFLOW.md) | Branching, commits, PRs, releases |
 | [Environments](docs/ENVIRONMENTS.md) | Dev/UAT/Prod configuration |
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | Common issues and solutions |
@@ -117,7 +210,7 @@ npm run docker:run
 
 ## Tech Stack Overview
 
-### Frontend (Current)
+### Frontend
 
 - **Vue 3** with Composition API
 - **TypeScript** for type safety
@@ -131,13 +224,15 @@ npm run docker:run
 - **MSW** for API mocking
 - **Vitest** + **Playwright** for testing
 
-### Backend (Planned)
+### Backend
 
-- **Spring Boot 3** with Java 21
-- **PostgreSQL** database
+- **Spring Boot 3.2** with Java 21
+- **PostgreSQL** / H2 database
+- **Spring Security** with JWT authentication
 - **Flyway** for migrations
-- **Spring Security** with JWT
 - **OpenAPI/Swagger** documentation
+- **Checkstyle** + **JaCoCo** for code quality
+- **Logback** with JSON structured logging
 
 ### Infrastructure (Planned)
 
