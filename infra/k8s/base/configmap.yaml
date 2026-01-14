@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rewine-backend-config
+  labels:
+    app: rewine-backend
+    component: backend
+data:
+  # Spring Profile
+  SPRING_PROFILES_ACTIVE: "prod"
+
+  # Server Configuration
+  SERVER_PORT: "8080"
+
+  # JPA Configuration
+  SPRING_JPA_SHOW_SQL: "false"
+  SPRING_JPA_HIBERNATE_DDL_AUTO: "none"
+
+  # Flyway Configuration
+  SPRING_FLYWAY_ENABLED: "true"
+  SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+
+  # JWT Configuration (non-sensitive)
+  JWT_ISSUER: "rewine-backend"
+  JWT_ACCESS_TOKEN_EXPIRATION: "900000"
+  JWT_REFRESH_TOKEN_EXPIRATION: "604800000"
+
+  # Logging
+  LOGGING_LEVEL_ROOT: "WARN"
+  LOGGING_LEVEL_COM_REWINE: "INFO"
+
+  # Actuator
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics,prometheus"
+  MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "when_authorized"
+

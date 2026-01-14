@@ -1,0 +1,121 @@
+# =============================================================================
+# Rewine - Docker Compose Configuration
+# =============================================================================
+# Local development environment with PostgreSQL and Backend services
+#
+# Usage:
+#   docker-compose up -d          # Start all services
+#   docker-compose down           # Stop all services
+#   docker-compose logs -f        # View logs
+#   docker-compose down -v        # Stop and remove volumes
+
+version: '3.8'
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Database
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: rewine-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-rewine}
+      POSTGRES_USER: ${POSTGRES_USER:-rewine}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rewine_secret}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rewine} -d ${POSTGRES_DB:-rewine}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rewine-network
+
+  # ---------------------------------------------------------------------------
+  # Rewine Backend API
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: rewine-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Spring Profile
+      SPRING_PROFILES_ACTIVE: local
+
+      # Database Configuration
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-rewine}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-rewine}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-rewine_secret}
+
+      # JWT Configuration
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-minimum-32-characters-long}
+      JWT_ISSUER: ${JWT_ISSUER:-rewine-backend}
+      JWT_ACCESS_TOKEN_EXPIRATION: ${JWT_ACCESS_TOKEN_EXPIRATION:-900000}
+      JWT_REFRESH_TOKEN_EXPIRATION: ${JWT_REFRESH_TOKEN_EXPIRATION:-604800000}
+
+      # Server Configuration
+      SERVER_PORT: 8080
+
+      # Flyway
+      SPRING_FLYWAY_ENABLED: "true"
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+
+      # JVM Options
+      JAVA_OPTS: >-
+        -Xms256m
+        -Xmx512m
+        -XX:+UseG1GC
+        -XX:+UseContainerSupport
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health/liveness"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - rewine-network
+
+  # ---------------------------------------------------------------------------
+  # Rewine Frontend (Optional - uncomment when needed)
+  # ---------------------------------------------------------------------------
+  # frontend:
+  #   build:
+  #     context: ../frontend
+  #     dockerfile: Dockerfile
+  #   container_name: rewine-frontend
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - backend
+  #   environment:
+  #     VITE_API_BASE_URL: http://backend:8080/api/v1
+  #   ports:
+  #     - "${FRONTEND_PORT:-3000}:80"
+  #   networks:
+  #     - rewine-network
+
+# -----------------------------------------------------------------------------
+# Volumes
+# -----------------------------------------------------------------------------
+volumes:
+  postgres_data:
+    driver: local
+
+# -----------------------------------------------------------------------------
+# Networks
+# -----------------------------------------------------------------------------
+networks:
+  rewine-network:
+    driver: bridge
+
