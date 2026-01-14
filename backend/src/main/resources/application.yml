@@ -45,10 +45,33 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info,metrics,prometheus,env,loggers
+      base-path: /actuator
   endpoint:
     health:
       show-details: when_authorized
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState,db
+        liveness:
+          include: livenessState
+    info:
+      enabled: true
+    metrics:
+      enabled: true
+    env:
+      enabled: true
+    loggers:
+      enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+    db:
+      enabled: true
 
 # Application Info
 info:
@@ -56,6 +79,12 @@ info:
     name: ${spring.application.name}
     version: ${spring.application.version}
     description: Wine Discovery Platform - Backend API
+
+# API Contact Configuration
+api:
+  contact:
+    name: Rewine Team
+    email: support@rewine.com
 
 # Logging Configuration
 logging:
@@ -69,9 +98,19 @@ logging:
 springdoc:
   api-docs:
     path: /api-docs
+    enabled: true
   swagger-ui:
     path: /swagger-ui.html
     operationsSorter: method
+    tagsSorter: alpha
+    displayRequestDuration: true
+    filter: true
+    url: /api-docs
+    disable-swagger-default-url: true
+  show-actuator: false
+  packages-to-scan: com.rewine.backend.controller
+  paths-to-match: /**
+  paths-to-exclude: /actuator/**
 
 # JWT Configuration
 jwt:

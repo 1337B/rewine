@@ -25,6 +25,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.Instant;
 import java.util.List;
@@ -222,6 +223,23 @@ public class GlobalExceptionHandlerImpl implements IGlobalExceptionHandler {
                 HttpStatus.NOT_FOUND,
                 ErrorCode.RESOURCE_NOT_FOUND.getCode(),
                 "Resource not found: " + ex.getRequestURL(),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    /**
+     * Handles static resource not found exceptions.
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleNoResourceFoundException(NoResourceFoundException ex) {
+        LOGGER.warn("No resource found: {}", ex.getResourcePath());
+
+        ApiErrorResponse response = buildErrorResponse(
+                HttpStatus.NOT_FOUND,
+                ErrorCode.RESOURCE_NOT_FOUND.getCode(),
+                "Resource not found: " + ex.getResourcePath(),
                 null
         );
 
