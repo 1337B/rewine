@@ -22,9 +22,9 @@ public interface IWineRouteRepository extends JpaRepository<WineRouteEntity, UUI
 
     Page<WineRouteEntity> findByCreatedById(UUID userId, Pageable pageable);
 
-    @Query("SELECT wr FROM WineRouteEntity wr WHERE "
-            + "LOWER(wr.name) LIKE LOWER(CONCAT('%', :search, '%')) OR "
-            + "LOWER(wr.description) LIKE LOWER(CONCAT('%', :search, '%'))")
+    @Query("SELECT wr FROM WineRouteEntity wr WHERE " +
+           "LOWER(wr.name) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(wr.description) LIKE LOWER(CONCAT('%', :search, '%'))")
     Page<WineRouteEntity> search(@Param("search") String search, Pageable pageable);
 }
 
