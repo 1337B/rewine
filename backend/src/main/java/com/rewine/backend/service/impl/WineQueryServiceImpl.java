@@ -9,6 +9,7 @@ import com.rewine.backend.exception.RewineException;
 import com.rewine.backend.model.entity.WineEntity;
 import com.rewine.backend.repository.IWineRepository;
 import com.rewine.backend.service.IWineQueryService;
+import com.rewine.backend.utils.builder.IWineDetailsAggregator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -33,9 +34,13 @@ public class WineQueryServiceImpl implements IWineQueryService {
     private static final Logger LOGGER = LoggerFactory.getLogger(WineQueryServiceImpl.class);
 
     private final IWineRepository wineRepository;
+    private final IWineDetailsAggregator wineDetailsAggregator;
 
-    public WineQueryServiceImpl(IWineRepository wineRepository) {
+    public WineQueryServiceImpl(
+            IWineRepository wineRepository,
+            IWineDetailsAggregator wineDetailsAggregator) {
         this.wineRepository = wineRepository;
+        this.wineDetailsAggregator = wineDetailsAggregator;
     }
 
     @Override
@@ -112,6 +117,12 @@ public class WineQueryServiceImpl implements IWineQueryService {
         LOGGER.debug("Found wine: {} ({})", wine.getName(), wine.getWineType());
 
         return WineDetailsResponse.fromEntity(wine);
+    }
+
+    @Override
+    public WineDetailsResponse getWineDetailsAggregated(UUID id, UUID userId) {
+        LOGGER.info("Getting aggregated wine details for ID: {}, userId: {}", id, userId);
+        return wineDetailsAggregator.aggregate(id, userId);
     }
 
     @Override

@@ -31,6 +31,16 @@ public interface IWineQueryService {
     WineDetailsResponse getWineDetails(UUID id);
 
     /**
+     * Gets aggregated wine details by ID with optional user context.
+     * Includes rating distribution, featured reviews preview, and user-specific data.
+     *
+     * @param id     the wine ID
+     * @param userId the optional user ID for personalized data
+     * @return the aggregated wine details
+     */
+    WineDetailsResponse getWineDetailsAggregated(UUID id, UUID userId);
+
+    /**
      * Gets featured wines.
      *
      * @param pageable pagination parameters

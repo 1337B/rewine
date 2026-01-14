@@ -1,5 +1,6 @@
 package com.rewine.backend.controller.impl;
 
+import com.rewine.backend.configuration.security.CustomUserDetails;
 import com.rewine.backend.controller.IWineController;
 import com.rewine.backend.dto.common.PageResponse;
 import com.rewine.backend.dto.request.WineSearchRequest;
@@ -14,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -115,9 +118,33 @@ public class WineControllerImpl implements IWineController {
     public ResponseEntity<WineDetailsResponse> getWineDetails(@PathVariable UUID id) {
         LOGGER.info("GET /wines/{} - Get wine details", id);
 
-        WineDetailsResponse response = wineQueryService.getWineDetails(id);
+        // Extract user ID from security context if authenticated
+        UUID userId = getCurrentUserId();
+        LOGGER.debug("Current user ID: {}", userId);
+
+        // Use aggregated version for rich response
+        WineDetailsResponse response = wineQueryService.getWineDetailsAggregated(id, userId);
 
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Gets the current user ID from the security context.
+     *
+     * @return the user ID or null if not authenticated
+     */
+    private UUID getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (Objects.isNull(authentication) || !authentication.isAuthenticated()) {
+            return null;
+        }
+
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof CustomUserDetails userDetails) {
+            return userDetails.getId();
+        }
+
+        return null;
     }
 
     @Override
