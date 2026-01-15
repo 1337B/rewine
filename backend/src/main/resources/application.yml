@@ -119,3 +119,8 @@ cors:
   allowed-headers: "*"
   allow-credentials: true
 
+# AI Configuration
+rewine:
+  ai:
+    provider: ${AI_PROVIDER:mock}  # Options: mock, openai (openai requires additional config)
+
