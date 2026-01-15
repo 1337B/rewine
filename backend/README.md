@@ -189,6 +189,133 @@ Once running, these endpoints are available:
 | `/api/v1/admin/test` | GET | Test admin access |
 | `/api/v1/admin/moderator-test` | GET | Test moderator access (ADMIN or MODERATOR) |
 
+### Wine AI Profile Endpoints (Requires Authentication)
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/wines/{id}/ai-profile` | GET | Get AI profile for a wine (generates if not cached) |
+| `/api/v1/wines/{id}/ai-profile` | POST | Generate AI profile with options |
+| `/api/v1/wines/{id}/ai-profile/status` | GET | Check AI profile cache status |
+
+---
+
+## Wine AI Profiles
+
+The platform includes AI-generated wine profiles that provide rich descriptions, tasting notes, food pairings, and serving recommendations.
+
+### How It Works
+
+1. **First Request** → AI generates a profile and caches it in the database
+2. **Subsequent Requests** → Returns cached profile instantly (no AI call)
+3. **Force Regenerate** → Can optionally regenerate profile via POST request
+
+### AI Profile Content
+
+Each AI profile includes:
+- **Summary**: AI-generated description of the wine
+- **Tasting Notes**: Appearance, aroma, palate, and finish
+- **Food Pairings**: Recommended food combinations
+- **Occasions**: Suggested occasions for enjoying the wine
+- **Fun Facts**: Interesting facts about the wine or region
+- **Serving Recommendations**: Temperature, decanting, glass type, storage tips
+
+### Example: Get AI Profile
+
+```bash
+curl -X GET "http://localhost:8080/api/v1/wines/{wineId}/ai-profile?language=es-AR" \
+  -H "Authorization: Bearer <accessToken>"
+```
+
+**Response:**
+```json
+{
+  "wineId": "550e8400-e29b-41d4-a716-446655440000",
+  "wineName": "Malbec Reserve 2020",
+  "language": "es-AR",
+  "generatedAt": "2026-01-15T12:00:00Z",
+  "summary": "El Malbec Reserve 2020 es un vino tinto excepcional...",
+  "tastingNotes": {
+    "appearance": "Color brillante con reflejos característicos...",
+    "aroma": "Aromas complejos con notas frutales...",
+    "palate": "En boca presenta un equilibrio excelente...",
+    "finish": "Final largo y persistente..."
+  },
+  "foodPairings": [
+    "Carnes rojas a la parrilla",
+    "Pastas con salsas robustas",
+    "Quesos maduros"
+  ],
+  "occasions": [
+    "Cenas especiales con amigos",
+    "Celebraciones familiares"
+  ],
+  "funFacts": [
+    "La región tiene más de 150 años de tradición vitivinícola."
+  ],
+  "servingRecommendations": {
+    "temperature": "Servir entre 16-18°C",
+    "decanting": "Se recomienda decantar 30 minutos antes de servir",
+    "glassType": "Copa de vino tinto amplia tipo Bordeaux",
+    "storageTips": "Conservar en lugar fresco y oscuro"
+  }
+}
+```
+
+### Example: Generate AI Profile (with options)
+
+```bash
+curl -X POST "http://localhost:8080/api/v1/wines/{wineId}/ai-profile" \
+  -H "Authorization: Bearer <accessToken>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "language": "en-US",
+    "forceRegenerate": false
+  }'
+```
+
+### Example: Check Profile Status
+
+```bash
+curl -X GET "http://localhost:8080/api/v1/wines/{wineId}/ai-profile/status?language=es-AR" \
+  -H "Authorization: Bearer <accessToken>"
+```
+
+**Response:**
+```json
+{
+  "wineId": "550e8400-e29b-41d4-a716-446655440000",
+  "status": "GENERATED",
+  "generatedAt": "2026-01-15T12:00:00Z",
+  "availableLanguages": ["es-AR"],
+  "hasRequestedLanguage": true,
+  "requestedLanguage": "es-AR"
+}
+```
+
+### Supported Languages
+
+| Language Code | Description |
+|---------------|-------------|
+| `es-AR` | Spanish (Argentina) - Default |
+| `en-US` | English (United States) |
+
+### AI Provider Configuration
+
+The AI provider can be configured via environment variable:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `AI_PROVIDER` | `mock` | AI provider: `mock` (development) or `openai` |
+
+```yaml
+# application.yml
+rewine:
+  ai:
+    provider: ${AI_PROVIDER:mock}
+```
+
+**Note**: The `mock` provider generates realistic sample profiles for development without requiring external API keys.
+
 ---
 
 ## Authentication
