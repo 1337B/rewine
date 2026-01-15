@@ -197,6 +197,12 @@ Once running, these endpoints are available:
 | `/api/v1/wines/{id}/ai-profile` | POST | Generate AI profile with options |
 | `/api/v1/wines/{id}/ai-profile/status` | GET | Check AI profile cache status |
 
+### Wine Comparison Endpoint (Requires Authentication)
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/wines/compare` | POST | Compare two wines using AI (generates if not cached) |
+
 ---
 
 ## Wine AI Profiles
@@ -315,6 +321,84 @@ rewine:
 ```
 
 **Note**: The `mock` provider generates realistic sample profiles for development without requiring external API keys.
+
+---
+
+## Wine Comparisons
+
+The platform supports AI-generated comparisons between two wines, helping users understand the differences and similarities.
+
+### How It Works
+
+1. **First Request** → AI generates a comparison and caches it in the database
+2. **Subsequent Requests** → Returns cached comparison instantly (no AI call)
+3. **Normalized Pairs** → Wine pairs are normalized (A < B) to prevent duplicate comparisons for (A,B) vs (B,A)
+4. **Force Regenerate** → Can optionally regenerate comparison via request parameter
+
+### Comparison Content
+
+Each AI comparison includes:
+- **Summary**: Overall comparison summary
+- **Attribute Comparison**: Side-by-side comparison of appearance, aroma, palate, finish
+- **Similarities**: Key similarities between the wines
+- **Differences**: Key differences between the wines
+- **Food Pairings**: Food pairing recommendations for each wine and shared pairings
+- **Occasions**: Best occasions for each wine
+- **Value Assessment**: Price/quality assessment
+- **Recommendations**: When to choose wine A vs wine B
+
+### Example: Compare Two Wines
+
+```bash
+curl -X POST "http://localhost:8080/api/v1/wines/compare" \
+  -H "Authorization: Bearer <accessToken>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "wineAId": "550e8400-e29b-41d4-a716-446655440000",
+    "wineBId": "550e8400-e29b-41d4-a716-446655440001",
+    "language": "es-AR",
+    "forceRegenerate": false
+  }'
+```
+
+**Response:**
+```json
+{
+  "wineAId": "550e8400-e29b-41d4-a716-446655440000",
+  "wineAName": "Malbec Reserve 2020",
+  "wineBId": "550e8400-e29b-41d4-a716-446655440001",
+  "wineBName": "Cabernet Sauvignon 2019",
+  "language": "es-AR",
+  "generatedAt": "2026-01-15T12:00:00Z",
+  "cached": false,
+  "summary": "Comparando Malbec Reserve 2020 con Cabernet Sauvignon 2019...",
+  "attributeComparison": {
+    "appearance": {
+      "wineA": "Color profundo con reflejos brillantes",
+      "wineB": "Color intenso con tonos característicos",
+      "comparison": "Ambos presentan excelente claridad"
+    }
+  },
+  "similarities": [
+    "Ambos vinos provienen de viñedos de alta calidad",
+    "Comparten un perfil de envejecimiento similar"
+  ],
+  "differences": [
+    "Malbec Reserve 2020 tiene mayor intensidad tánica",
+    "Cabernet Sauvignon 2019 presenta más notas frutales"
+  ],
+  "foodPairings": {
+    "wineA": ["Asado argentino", "Cordero al horno"],
+    "wineB": ["Pasta con ragú", "Ternera a la parrilla"],
+    "shared": ["Carnes rojas", "Empanadas"]
+  },
+  "recommendation": {
+    "chooseWineAIf": "Elige Malbec Reserve 2020 si prefieres vinos con mayor estructura",
+    "chooseWineBIf": "Elige Cabernet Sauvignon 2019 si buscas un vino más accesible",
+    "overallNote": "Ambos son excelentes opciones que satisfarán a cualquier amante del vino"
+  }
+}
+```
 
 ---
 

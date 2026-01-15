@@ -20,6 +20,16 @@ public interface IAiClient {
     Map<String, Object> generateWineProfile(WineEntity wine, String language);
 
     /**
+     * Generates an AI comparison between two wines.
+     *
+     * @param wineA    the first wine entity
+     * @param wineB    the second wine entity
+     * @param language the target language code (e.g., "es-AR", "en-US")
+     * @return a map containing the generated comparison data
+     */
+    Map<String, Object> generateWineComparison(WineEntity wineA, WineEntity wineB, String language);
+
+    /**
      * Checks if the AI service is available.
      *
      * @return true if the service is available
