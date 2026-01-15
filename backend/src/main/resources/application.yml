@@ -112,16 +112,75 @@ jwt:
   access-token-expiration: ${JWT_ACCESS_EXPIRATION:900000}    # 15 minutes in milliseconds
   refresh-token-expiration: ${JWT_REFRESH_EXPIRATION:604800000} # 7 days in milliseconds
 
-# CORS Configuration
-cors:
-  allowed-origins: ${CORS_ORIGINS:http://localhost:3000,http://localhost:4173,http://localhost:5173}
-  allowed-methods: GET,POST,PUT,DELETE,OPTIONS
-  allowed-headers: "*"
-  allow-credentials: true
-
-# AI Configuration - Common Defaults
+# =============================================================================
+# Rewine Configuration - Common Defaults
 # Profile-specific settings (local, production) can override these
+# =============================================================================
 rewine:
+  # CORS Configuration
+  cors:
+    enabled: true
+    allowed-origins:
+      - http://localhost:3000
+      - http://localhost:4173
+      - http://localhost:5173
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - PATCH
+      - OPTIONS
+    allowed-headers:
+      - Authorization
+      - Content-Type
+      - X-Request-Id
+      - Accept
+      - Origin
+      - X-Requested-With
+    exposed-headers:
+      - X-Request-Id
+      - X-RateLimit-Remaining
+      - X-RateLimit-Limit
+      - X-RateLimit-Reset
+    allow-credentials: true
+    max-age: 3600
+
+  # Rate Limiting Configuration
+  rate-limit:
+    enabled: true
+    cache-expiration-seconds: 300
+    max-cache-size: 10000
+    login:
+      requests: 10
+      window-seconds: 60
+    register:
+      requests: 5
+      window-seconds: 60
+    public-get:
+      requests: 120
+      window-seconds: 60
+    authenticated:
+      requests: 200
+      window-seconds: 60
+
+  # Security Headers Configuration
+  security:
+    headers:
+      enabled: true
+      content-type-options: true
+      frame-options: DENY
+      referrer-policy: strict-origin-when-cross-origin
+      content-security-policy: "default-src 'none'; frame-ancestors 'none'"
+      permissions-policy: "geolocation=(), camera=(), microphone=()"
+      xss-protection: true
+      hsts:
+        enabled: false  # Enable only in production with HTTPS
+        max-age-seconds: 31536000
+        include-subdomains: true
+        preload: false
+
+  # AI Configuration
   ai:
     provider: ${AI_PROVIDER:mock}
     enabled: ${AI_ENABLED:true}
@@ -137,7 +196,7 @@ rewine:
       max-retries: ${AI_MAX_RETRIES:2}
       logging-enabled: ${AI_HTTP_LOGGING:true}
 
-  # Maps Configuration - Common Defaults
+  # Maps Configuration
   maps:
     enabled: ${MAPS_ENABLED:false}
     provider: ${MAPS_PROVIDER:openstreetmap}

@@ -99,6 +99,49 @@ logging:
 # Get your API key from: https://platform.openai.com/api-keys
 # =============================================================================
 rewine:
+  # =============================================================================
+  # CORS Configuration - Local Development (permissive)
+  # =============================================================================
+  cors:
+    enabled: true
+    allowed-origins:
+      - http://localhost:3000
+      - http://localhost:4173
+      - http://localhost:5173
+      - http://127.0.0.1:3000
+      - http://127.0.0.1:4173
+      - http://127.0.0.1:5173
+    allow-credentials: true
+
+  # =============================================================================
+  # Rate Limiting - Local Development (relaxed for testing)
+  # =============================================================================
+  rate-limit:
+    enabled: true
+    login:
+      requests: 50
+      window-seconds: 60
+    register:
+      requests: 20
+      window-seconds: 60
+    public-get:
+      requests: 500
+      window-seconds: 60
+    authenticated:
+      requests: 500
+      window-seconds: 60
+
+  # =============================================================================
+  # Security Headers - Local Development
+  # =============================================================================
+  security:
+    headers:
+      enabled: true
+      frame-options: SAMEORIGIN  # Allow H2 console in iframe
+      hsts:
+        enabled: false  # No HSTS for local HTTP
+
+  # AI Configuration
   ai:
     # Use 'mock' for development without OpenAI costs, 'openai' for real AI
     provider: ${AI_PROVIDER:openai}
