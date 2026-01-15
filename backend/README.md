@@ -59,6 +59,46 @@ The API will be available at: `http://localhost:8080/api/v1`
 
 ---
 
+## Seed Data (Local Development Only)
+
+When running with the `local` profile, the database is automatically seeded with test data via Flyway repeatable migrations. This makes the API immediately usable for development and testing.
+
+### Seeded Users
+
+| Email | Username | Password | Roles |
+|-------|----------|----------|-------|
+| `admin@rewine.local` | admin | `Rewine123!` | ROLE_ADMIN, ROLE_USER |
+| `partner@rewine.local` | partner | `Rewine123!` | ROLE_PARTNER, ROLE_USER |
+| `moderator@rewine.local` | moderator | `Rewine123!` | ROLE_MODERATOR, ROLE_USER |
+| `user@rewine.local` | user | `Rewine123!` | ROLE_USER |
+
+> ⚠️ **Security Note**: These credentials are for LOCAL DEVELOPMENT ONLY. They are NOT present in production deployments.
+
+### Seeded Content
+
+| Entity | Count | Description |
+|--------|-------|-------------|
+| Wineries | 5 | Argentine wineries (Catena Zapata, Norton, Trapiche, Zuccardi, Luigi Bosca) |
+| Wines | 20 | Various wines with grapes, styles, ratings |
+| Wine Routes | 3 | Routes around Mendoza (Luján de Cuyo, Valle de Uco, Gran Tour) |
+| Events | 10 | Wine events around Mendoza (lat: -32.89, lng: -68.83) |
+
+### Quick Login Test
+
+```bash
+# Login as admin
+curl -X POST "http://localhost:8080/api/v1/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"usernameOrEmail": "admin@rewine.local", "password": "Rewine123!"}'
+
+# Login as partner
+curl -X POST "http://localhost:8080/api/v1/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"usernameOrEmail": "partner@rewine.local", "password": "Rewine123!"}'
+```
+
+---
+
 ## Local PostgreSQL Configuration
 
 The default profile (`local`) uses PostgreSQL with Flyway migrations enabled.
