@@ -83,8 +83,8 @@
         <appender-ref ref="ACCESS_LOG"/>
     </logger>
 
-    <!-- Spring Profile: default/dev - Human-readable console -->
-    <springProfile name="default,dev,test">
+    <!-- Spring Profile: default/dev/local - Human-readable console -->
+    <springProfile name="default,dev,local,test">
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
         </root>

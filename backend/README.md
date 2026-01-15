@@ -8,7 +8,8 @@ Spring Boot 3.x REST API for the Rewine Wine Discovery Platform.
 
 - **Java 21** (LTS) - Required
 - **Maven 3.9+** - Build tool
-- **Docker** (optional) - For containerized database
+- **Docker** - For PostgreSQL database (recommended)
+- **PostgreSQL 15+** - Database (can run via Docker)
 
 ### Verify Java Version
 
@@ -26,7 +27,28 @@ sdk use java 21.0.5-tem
 
 ## Quick Start
 
-### 1. Run with In-Memory Database (H2)
+### 1. Start PostgreSQL Database (Required)
+
+The application requires PostgreSQL to run. Start it with Docker:
+
+```bash
+# Start PostgreSQL container
+docker run -d \
+  --name rewine-postgres \
+  -e POSTGRES_DB=rewine \
+  -e POSTGRES_USER=rewine \
+  -e POSTGRES_PASSWORD=rewine_secret \
+  -p 5432:5432 \
+  postgres:15
+```
+
+Or use docker-compose from `/rewine/infra`:
+```bash
+cd ../infra
+docker-compose up -d postgres
+```
+
+### 2. Run the Application
 
 ```bash
 # From /backend directory
@@ -35,20 +57,53 @@ mvn spring-boot:run
 
 The API will be available at: `http://localhost:8080/api/v1`
 
-### 2. Run with PostgreSQL (Docker)
+---
+
+## Local PostgreSQL Configuration
+
+The default profile (`local`) uses PostgreSQL with Flyway migrations enabled.
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DB_HOST` | `localhost` | PostgreSQL host |
+| `DB_PORT` | `5432` | PostgreSQL port |
+| `DB_NAME` | `rewine` | Database name |
+| `DB_USER` | `rewine` | Database user |
+| `DB_PASSWORD` | `rewine_secret` | Database password |
+| `JWT_SECRET` | (dev default) | JWT signing secret |
+| `SERVER_PORT` | `8080` | Application port |
+
+### Override Environment Variables
 
 ```bash
-# Start PostgreSQL container
-docker run -d \
-  --name rewine-postgres \
-  -e POSTGRES_DB=rewinedb \
-  -e POSTGRES_USER=rewine \
-  -e POSTGRES_PASSWORD=rewine123 \
-  -p 5432:5432 \
-  postgres:15
+# Override specific variables
+DB_HOST=192.168.1.100 DB_PASSWORD=mypassword mvn spring-boot:run
 
-# Run with PostgreSQL profile
-mvn spring-boot:run -Dspring-boot.run.profiles=postgres
+# Or export them
+export DB_HOST=192.168.1.100
+export DB_PASSWORD=mypassword
+mvn spring-boot:run
+```
+
+### Available Profiles
+
+| Profile | Database | Use Case |
+|---------|----------|----------|
+| `local` (default) | PostgreSQL | Local development |
+| `test` | H2 in-memory | Unit tests |
+| `integration` | Testcontainers PostgreSQL | Integration tests |
+| `production` | PostgreSQL | Production deployment |
+
+### Run with Different Profile
+
+```bash
+# Run with test profile (H2 in-memory)
+mvn spring-boot:run -Dspring-boot.run.profiles=test
+
+# Run with production profile
+mvn spring-boot:run -Dspring-boot.run.profiles=production
 ```
 
 ---
@@ -68,9 +123,9 @@ mvn spring-boot:run -Dspring-boot.run.profiles=postgres
 
 | Command | Description |
 |---------|-------------|
-| `mvn spring-boot:run` | Run the application (dev mode) |
-| `mvn spring-boot:run -Dspring-boot.run.profiles=dev` | Run with dev profile |
-| `mvn spring-boot:run -Dspring-boot.run.profiles=postgres` | Run with PostgreSQL |
+| `mvn spring-boot:run` | Run the application (local profile) |
+| `mvn spring-boot:run -Dspring-boot.run.profiles=test` | Run with H2 (test profile) |
+| `mvn spring-boot:run -Dspring-boot.run.profiles=production` | Run with production profile |
 | `java -jar target/rewine-backend-0.0.1-SNAPSHOT.jar` | Run packaged JAR |
 
 ### Test Commands
@@ -114,7 +169,6 @@ Once running, these endpoints are available:
 | `/api/v1/version` | GET | Application version |
 | `/api/v1/swagger-ui.html` | GET | Swagger UI (API docs) |
 | `/api/v1/api-docs` | GET | OpenAPI JSON spec |
-| `/api/v1/h2-console` | - | H2 Database console (dev only) |
 | `/api/v1/actuator/health` | GET | Actuator health endpoint |
 | `/api/v1/actuator/info` | GET | Actuator info endpoint |
 

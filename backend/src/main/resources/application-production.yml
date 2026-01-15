@@ -1,23 +1,24 @@
 # =============================================================================
-# Rewine Backend - PostgreSQL Configuration
+# Rewine Backend - Production Configuration (PostgreSQL)
 # =============================================================================
-# Activate this profile with: spring.profiles.active=postgres
-# Or via environment: SPRING_PROFILES_ACTIVE=postgres
+# Activate this profile with: spring.profiles.active=production
+# Or via environment: SPRING_PROFILES_ACTIVE=production
 #
-# Required environment variables:
-#   DB_HOST     - PostgreSQL host (default: localhost)
-#   DB_PORT     - PostgreSQL port (default: 5432)
-#   DB_NAME     - Database name (default: rewinedb)
-#   DB_USER     - Database user (default: rewine)
-#   DB_PASSWORD - Database password (default: rewine123)
+# Required environment variables (NO DEFAULTS - must be provided):
+#   DB_HOST     - PostgreSQL host
+#   DB_PORT     - PostgreSQL port
+#   DB_NAME     - Database name
+#   DB_USER     - Database user
+#   DB_PASSWORD - Database password
+#   JWT_SECRET  - JWT signing secret (min 256 bits)
 # =============================================================================
 
 spring:
   # PostgreSQL Database Configuration
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:rewinedb}
-    username: ${DB_USER:rewine}
-    password: ${DB_PASSWORD:rewine123}
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
       minimum-idle: 5
@@ -25,43 +26,50 @@ spring:
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
-      pool-name: RewineHikariPool
+      pool-name: RewineProductionHikariPool
+      # Fail fast if database is not reachable
+      initialization-fail-timeout: 30000
 
   # JPA Configuration
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
     show-sql: false
     open-in-view: false
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
         jdbc:
           batch_size: 25
         order_inserts: true
         order_updates: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
-  # Flyway Configuration - enabled for PostgreSQL
+  # Flyway Configuration - ENABLED for production
   flyway:
     enabled: true
-    baseline-on-migrate: true
-    baseline-version: 0
+    baseline-on-migrate: false
     locations: classpath:db/migration
     validate-on-migrate: true
     clean-disabled: true
+    fail-on-missing-locations: true
 
-  # Disable H2 Console for PostgreSQL
+  # Disable H2 Console
   h2:
     console:
       enabled: false
 
-# Logging
+  # Disable SQL init scripts
+  sql:
+    init:
+      mode: never
+
+# Logging - minimal in production
 logging:
   level:
-    root: INFO
+    root: WARN
     com.rewine: INFO
     org.hibernate.SQL: WARN
-    org.hibernate.type.descriptor.sql.BasicBinder: WARN
     org.flywaydb: INFO
+
 
