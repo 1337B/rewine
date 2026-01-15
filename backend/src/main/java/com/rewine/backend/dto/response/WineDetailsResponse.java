@@ -60,6 +60,9 @@ public class WineDetailsResponse {
     // AI profile status
     private AiProfileStatus aiProfileStatus;
 
+    // When the AI profile was generated (null if not generated)
+    private Instant aiProfileGeneratedAt;
+
     /**
      * Rating distribution showing counts per star rating.
      */

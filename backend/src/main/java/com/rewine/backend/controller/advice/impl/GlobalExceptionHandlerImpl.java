@@ -149,19 +149,37 @@ public class GlobalExceptionHandlerImpl implements IGlobalExceptionHandler {
     }
 
     /**
-     * Handles type mismatch exceptions.
+     * Handles type mismatch exceptions including invalid enum values.
+     * Provides helpful error messages with valid options for enum parameters.
      */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiErrorResponse> handleTypeMismatchException(MethodArgumentTypeMismatchException ex) {
         LOGGER.warn("Type mismatch: {}", ex.getMessage());
 
-        String message = String.format("Invalid value '%s' for parameter '%s'", ex.getValue(), ex.getName());
+        String message;
+        Class<?> requiredType = ex.getRequiredType();
+
+        if (Objects.nonNull(requiredType) && requiredType.isEnum()) {
+            // For enum types, provide the list of valid values
+            Object[] enumConstants = requiredType.getEnumConstants();
+            String validValues = java.util.Arrays.stream(enumConstants)
+                    .map(Object::toString)
+                    .collect(java.util.stream.Collectors.joining(", "));
+            message = String.format("Invalid value '%s' for parameter '%s'. Valid values are: %s",
+                    ex.getValue(), ex.getName(), validValues);
+        } else {
+            message = String.format("Invalid value '%s' for parameter '%s'", ex.getValue(), ex.getName());
+        }
+
+        List<FieldValidationError> fieldErrors = List.of(
+                FieldValidationError.of(ex.getName(), message)
+        );
 
         ApiErrorResponse response = buildErrorResponse(
                 HttpStatus.BAD_REQUEST,
                 ErrorCode.VALIDATION_ERROR.getCode(),
                 message,
-                null
+                fieldErrors
         );
 
         return ResponseEntity.badRequest().body(response);

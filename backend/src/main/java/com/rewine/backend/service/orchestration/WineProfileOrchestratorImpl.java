@@ -57,7 +57,9 @@ public class WineProfileOrchestratorImpl implements IWineProfileOrchestrator {
 
         if (existingProfile.isPresent()) {
             LOGGER.info("Found cached AI profile for wine: {}, language: {}", wineId, normalizedLanguage);
-            return mapToResponse(existingProfile.get());
+            WineAiProfileResponse response = mapToResponse(existingProfile.get());
+            response.setCached(true);
+            return response;
         }
 
         // Step 2: Profile doesn't exist, need to generate
@@ -166,8 +168,10 @@ public class WineProfileOrchestratorImpl implements IWineProfileOrchestrator {
         WineAiProfileEntity savedProfile = wineAiProfileRepository.save(profileEntity);
         LOGGER.info("Persisted AI profile with ID: {} for wine: {}", savedProfile.getId(), wineId);
 
-        // Step 5: Map to response
-        return mapToResponse(savedProfile, wine.getName());
+        // Step 5: Map to response (newly generated, not cached)
+        WineAiProfileResponse response = mapToResponse(savedProfile, wine.getName());
+        response.setCached(false);
+        return response;
     }
 
     /**

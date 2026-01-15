@@ -7,10 +7,12 @@ import com.rewine.backend.dto.response.WineDetailsResponse.UserWineData;
 import com.rewine.backend.exception.ErrorCode;
 import com.rewine.backend.exception.RewineException;
 import com.rewine.backend.model.entity.ReviewEntity;
+import com.rewine.backend.model.entity.WineAiProfileEntity;
 import com.rewine.backend.model.entity.WineEntity;
 import com.rewine.backend.model.enums.AiProfileStatus;
 import com.rewine.backend.repository.IReviewLikeRepository;
 import com.rewine.backend.repository.IReviewRepository;
+import com.rewine.backend.repository.IWineAiProfileRepository;
 import com.rewine.backend.repository.IWineRepository;
 import com.rewine.backend.utils.builder.IWineDetailsAggregator;
 import org.slf4j.Logger;
@@ -25,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -44,17 +47,25 @@ public class WineDetailsAggregatorImpl implements IWineDetailsAggregator {
      */
     private static final int DEFAULT_FEATURED_REVIEWS_COUNT = 4;
 
+    /**
+     * Default language for AI profile lookups.
+     */
+    private static final String DEFAULT_LANGUAGE = "es-AR";
+
     private final IWineRepository wineRepository;
     private final IReviewRepository reviewRepository;
     private final IReviewLikeRepository reviewLikeRepository;
+    private final IWineAiProfileRepository wineAiProfileRepository;
 
     public WineDetailsAggregatorImpl(
             IWineRepository wineRepository,
             IReviewRepository reviewRepository,
-            IReviewLikeRepository reviewLikeRepository) {
+            IReviewLikeRepository reviewLikeRepository,
+            IWineAiProfileRepository wineAiProfileRepository) {
         this.wineRepository = wineRepository;
         this.reviewRepository = reviewRepository;
         this.reviewLikeRepository = reviewLikeRepository;
+        this.wineAiProfileRepository = wineAiProfileRepository;
     }
 
     @Override
@@ -94,8 +105,8 @@ public class WineDetailsAggregatorImpl implements IWineDetailsAggregator {
             LOGGER.debug("User wine data: hasReviewed={}", userWineData.getHasReviewed());
         }
 
-        // Set AI profile status (placeholder - always NOT_REQUESTED for now)
-        response.setAiProfileStatus(resolveAiProfileStatus(wineId));
+        // Set AI profile status and generatedAt
+        resolveAiProfileInfo(wineId, response);
 
         LOGGER.info("Successfully aggregated wine details for wineId={}", wineId);
         return response;
@@ -238,17 +249,28 @@ public class WineDetailsAggregatorImpl implements IWineDetailsAggregator {
     }
 
     /**
-     * Resolves the AI profile status for a wine.
-     * Currently returns NOT_REQUESTED as placeholder.
+     * Resolves the AI profile status and generation timestamp for a wine.
+     * Checks the database for an existing AI profile in the default language.
      *
-     * @param wineId the wine ID
-     * @return the AI profile status
+     * @param wineId   the wine ID
+     * @param response the response to update with AI profile info
      */
-    private AiProfileStatus resolveAiProfileStatus(UUID wineId) {
-        // TODO: Implement when AI profile feature is ready
-        // This would check if an AI profile exists for the wine in the database
-        LOGGER.debug("AI profile status check for wineId={} - placeholder returning NOT_REQUESTED", wineId);
-        return AiProfileStatus.NOT_REQUESTED;
+    private void resolveAiProfileInfo(UUID wineId, WineDetailsResponse response) {
+        LOGGER.debug("Checking AI profile status for wineId={}", wineId);
+
+        Optional<WineAiProfileEntity> aiProfile = wineAiProfileRepository
+                .findByWineIdAndLanguage(wineId, DEFAULT_LANGUAGE);
+
+        if (aiProfile.isPresent()) {
+            response.setAiProfileStatus(AiProfileStatus.GENERATED);
+            response.setAiProfileGeneratedAt(aiProfile.get().getCreatedAt());
+            LOGGER.debug("AI profile found for wineId={}, generatedAt={}",
+                    wineId, aiProfile.get().getCreatedAt());
+        } else {
+            response.setAiProfileStatus(AiProfileStatus.NOT_REQUESTED);
+            response.setAiProfileGeneratedAt(null);
+            LOGGER.debug("No AI profile found for wineId={}", wineId);
+        }
     }
 }
 
