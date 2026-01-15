@@ -1,0 +1,88 @@
+# =============================================================================
+# Rewine Backend - Local Development Configuration (PostgreSQL)
+# =============================================================================
+# This is the default profile for local development.
+# Requires a PostgreSQL database to be running.
+#
+# Quick start with Docker:
+#   docker run -d --name rewine-postgres \
+#     -e POSTGRES_DB=rewine \
+#     -e POSTGRES_USER=rewine \
+#     -e POSTGRES_PASSWORD=rewine_secret \
+#     -p 5432:5432 \
+#     postgres:15
+#
+# Or use docker-compose from /rewine/infra:
+#   docker-compose up -d postgres
+#
+# Required environment variables (with defaults):
+#   DB_HOST     - PostgreSQL host (default: localhost)
+#   DB_PORT     - PostgreSQL port (default: 5432)
+#   DB_NAME     - Database name (default: rewine)
+#   DB_USER     - Database user (default: rewine)
+#   DB_PASSWORD - Database password (default: rewine_secret)
+# =============================================================================
+
+spring:
+  # PostgreSQL Database Configuration
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:rewine}
+    username: ${DB_USER:rewine}
+    password: ${DB_PASSWORD:rewine_secret}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      minimum-idle: 2
+      maximum-pool-size: 10
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      pool-name: RewineLocalHikariPool
+      # Fail fast if database is not reachable
+      initialization-fail-timeout: 30000
+
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  # Flyway Configuration - ENABLED for PostgreSQL
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    locations: classpath:db/migration
+    validate-on-migrate: true
+    clean-disabled: true
+    fail-on-missing-locations: true
+
+  # Disable H2 Console (not available in local profile)
+  h2:
+    console:
+      enabled: false
+
+  # Disable SQL init scripts (Flyway handles schema)
+  sql:
+    init:
+      mode: never
+
+# Logging - verbose for local development
+logging:
+  level:
+    root: INFO
+    com.rewine: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.flywaydb: INFO
+    com.zaxxer.hikari: INFO
+
