@@ -59,7 +59,7 @@ public class WineAiProfileEntity {
     private String language;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "profile_json", nullable = false, columnDefinition = "jsonb")
+    @Column(name = "profile_json", nullable = false)
     private Map<String, Object> profileJson;
 
     @Column(name = "created_at", nullable = false, updatable = false)

@@ -20,6 +20,8 @@ public enum ErrorCode {
     TOKEN_INVALID("E2003", "Invalid token"),
     UNAUTHORIZED("E2004", "Unauthorized access"),
     FORBIDDEN("E2005", "Access forbidden"),
+    ACCESS_DENIED("E2006", "Access denied"),
+    AUTHENTICATION_REQUIRED("E2007", "Authentication required"),
 
     // User errors (3xxx)
     USER_NOT_FOUND("E3000", "User not found"),

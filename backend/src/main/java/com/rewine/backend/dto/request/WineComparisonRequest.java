@@ -23,14 +23,14 @@ public class WineComparisonRequest {
      * The ID of the first wine to compare.
      */
     @NotNull(message = "First wine ID is required")
-    @Schema(description = "ID of the first wine", required = true)
+    @Schema(description = "ID of the first wine", requiredMode = Schema.RequiredMode.REQUIRED)
     private UUID wineAId;
 
     /**
      * The ID of the second wine to compare.
      */
     @NotNull(message = "Second wine ID is required")
-    @Schema(description = "ID of the second wine", required = true)
+    @Schema(description = "ID of the second wine", requiredMode = Schema.RequiredMode.REQUIRED)
     private UUID wineBId;
 
     /**

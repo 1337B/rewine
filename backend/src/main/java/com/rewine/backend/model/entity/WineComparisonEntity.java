@@ -70,7 +70,7 @@ public class WineComparisonEntity {
     private String language;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "comparison_json", nullable = false, columnDefinition = "jsonb")
+    @Column(name = "comparison_json", nullable = false)
     private Map<String, Object> comparisonJson;
 
     @Column(name = "created_at", nullable = false, updatable = false)
