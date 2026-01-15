@@ -1,7 +1,12 @@
 package com.rewine.backend.model.entity;
 
+import com.rewine.backend.model.enums.EventStatus;
+import com.rewine.backend.model.enums.EventType;
+import com.rewine.backend.model.enums.OrganizerType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,6 +19,8 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.Objects;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
@@ -21,7 +28,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Event entity.
+ * Event entity representing wine-related events.
  */
 @Entity
 @Table(name = "events")
@@ -42,7 +49,8 @@ public class EventEntity {
     private String description;
 
     @Column(nullable = false)
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private EventType type;
 
     @Column(name = "start_date", nullable = false)
     private Instant startDate;
@@ -76,8 +84,9 @@ public class EventEntity {
     private Integer currentAttendees = 0;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     @Builder.Default
-    private String status = "draft";
+    private EventStatus status = EventStatus.DRAFT;
 
     @Column(name = "image_url")
     private String imageUrl;
@@ -85,6 +94,20 @@ public class EventEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organizer_id", nullable = false)
     private UserEntity organizer;
+
+    @Column(name = "organizer_type")
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private OrganizerType organizerType = OrganizerType.PARTNER;
+
+    @Column(name = "contact_email")
+    private String contactEmail;
+
+    @Column(name = "contact_phone")
+    private String contactPhone;
+
+    @Column(name = "website_url")
+    private String websiteUrl;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -101,6 +124,27 @@ public class EventEntity {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = Instant.now();
+    }
+
+    /**
+     * Checks if the event is currently accepting registrations.
+     *
+     * @return true if event is published and has capacity
+     */
+    public boolean isAvailable() {
+        return status == EventStatus.PUBLISHED
+                && (Objects.isNull(maxAttendees) || currentAttendees < maxAttendees)
+                && startDate.isAfter(Instant.now());
+    }
+
+    /**
+     * Checks if a user is the organizer of this event.
+     *
+     * @param userId the user ID to check
+     * @return true if the user is the organizer
+     */
+    public boolean isOrganizer(UUID userId) {
+        return Objects.nonNull(organizer) && organizer.getId().equals(userId);
     }
 }
 
