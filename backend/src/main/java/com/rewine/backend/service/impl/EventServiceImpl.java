@@ -119,10 +119,10 @@ public class EventServiceImpl implements IEventService {
         int totalPages = (int) Math.ceil((double) totalElements / pageable.getPageSize());
 
         return PageResponse.<EventSummaryResponse>builder()
-                .content(content)
-                .page(pageable.getPageNumber())
-                .size(pageable.getPageSize())
-                .totalElements(totalElements)
+                .items(content)
+                .pageNumber(pageable.getPageNumber())
+                .pageSize(pageable.getPageSize())
+                .totalItems(totalElements)
                 .totalPages(totalPages)
                 .first(pageable.getPageNumber() == 0)
                 .last(pageable.getPageNumber() >= totalPages - 1)

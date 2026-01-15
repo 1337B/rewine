@@ -42,6 +42,11 @@ public class WineAiProfileResponse {
     private Instant generatedAt;
 
     /**
+     * Whether this result was retrieved from cache (vs freshly generated).
+     */
+    private boolean cached;
+
+    /**
      * AI-generated summary of the wine.
      */
     private String summary;
