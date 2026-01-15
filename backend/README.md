@@ -619,6 +619,127 @@ curl -X POST http://localhost:8080/api/v1/auth/logout \
 - **Refresh Token Storage**: Tokens stored hashed (SHA-256) in database
 - **Request Correlation**: All requests have `X-Request-Id` header for tracing
 - **Method-Level Security**: `@PreAuthorize` annotations for fine-grained access control
+- **Rate Limiting**: Bucket4j-based rate limiting per IP (see below)
+- **Security Headers**: Comprehensive HTTP security headers
+- **CORS**: Environment-specific CORS configuration
+
+---
+
+## Rate Limiting
+
+The API implements rate limiting to protect against abuse and ensure fair usage.
+
+### Rate Limits by Endpoint
+
+| Endpoint Category | Local Limit | Production Limit | Window |
+|------------------|-------------|------------------|--------|
+| Login (`/auth/login`) | 50 req | 10 req | per minute |
+| Register (`/auth/register`) | 20 req | 5 req | per minute |
+| Public GET (`/wines`, `/events`, etc.) | 500 req | 120 req | per minute |
+| Authenticated endpoints | 500 req | 200 req | per minute |
+
+### Rate Limit Response Headers
+
+Every response includes rate limit information:
+
+| Header | Description |
+|--------|-------------|
+| `X-RateLimit-Limit` | Maximum requests allowed in window |
+| `X-RateLimit-Remaining` | Requests remaining in current window |
+| `X-RateLimit-Reset` | Unix timestamp when the window resets |
+
+### Rate Limit Exceeded Response (HTTP 429)
+
+```json
+{
+  "timestamp": "2026-01-15T12:00:00Z",
+  "path": "/api/v1/auth/login",
+  "requestId": "abc123-xyz789",
+  "status": 429,
+  "code": "RATE_LIMIT_EXCEEDED",
+  "message": "Too many requests. Please retry after 45 seconds."
+}
+```
+
+### Configuration
+
+```yaml
+rewine:
+  rate-limit:
+    enabled: true
+    login:
+      requests: 10
+      window-seconds: 60
+    register:
+      requests: 5
+      window-seconds: 60
+    public-get:
+      requests: 120
+      window-seconds: 60
+```
+
+---
+
+## Security Headers
+
+The API includes comprehensive security headers to protect against common web vulnerabilities.
+
+### Headers Applied
+
+| Header | Value (Production) | Description |
+|--------|-------------------|-------------|
+| `X-Content-Type-Options` | `nosniff` | Prevents MIME type sniffing |
+| `X-Frame-Options` | `DENY` | Prevents clickjacking |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` | Controls referrer information |
+| `Content-Security-Policy` | `default-src 'none'; frame-ancestors 'none'` | Restricts resource loading |
+| `Permissions-Policy` | `geolocation=(), camera=(), microphone=()` | Disables sensitive features |
+| `X-XSS-Protection` | `1; mode=block` | XSS protection for older browsers |
+| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains; preload` | HSTS (production only) |
+
+### Configuration by Profile
+
+| Setting | Local | Production |
+|---------|-------|------------|
+| HSTS Enabled | No | Yes |
+| Frame Options | SAMEORIGIN | DENY |
+| CSP | Strict | Strict |
+
+---
+
+## CORS Configuration
+
+Cross-Origin Resource Sharing is configured per environment.
+
+### Local Development
+
+```yaml
+rewine:
+  cors:
+    enabled: true
+    allowed-origins:
+      - http://localhost:3000
+      - http://localhost:4173
+      - http://localhost:5173
+    allow-credentials: true
+```
+
+### Production
+
+```yaml
+rewine:
+  cors:
+    enabled: true
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:https://rewine.app,https://www.rewine.app}
+    allow-credentials: true
+```
+
+**Important**: Production CORS configuration does NOT allow wildcard origins (`*`).
+
+### Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `CORS_ALLOWED_ORIGINS` | Comma-separated list of allowed origins | `https://rewine.app,https://admin.rewine.app` |
 
 ---
 

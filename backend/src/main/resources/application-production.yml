@@ -72,4 +72,86 @@ logging:
     org.hibernate.SQL: WARN
     org.flywaydb: INFO
 
+# =============================================================================
+# Rewine Production Configuration
+# =============================================================================
+rewine:
+  # =============================================================================
+  # CORS Configuration - Production (STRICT - no wildcards!)
+  # =============================================================================
+  # IMPORTANT: Update allowed-origins with your actual production domains
+  cors:
+    enabled: true
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:https://rewine.app,https://www.rewine.app}
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - PATCH
+      - OPTIONS
+    allowed-headers:
+      - Authorization
+      - Content-Type
+      - X-Request-Id
+      - Accept
+      - Origin
+    exposed-headers:
+      - X-Request-Id
+      - X-RateLimit-Remaining
+      - X-RateLimit-Limit
+      - X-RateLimit-Reset
+    allow-credentials: true
+    max-age: 7200
+
+  # =============================================================================
+  # Rate Limiting - Production (strict)
+  # =============================================================================
+  rate-limit:
+    enabled: true
+    cache-expiration-seconds: 600
+    max-cache-size: 50000
+    login:
+      requests: 10
+      window-seconds: 60
+    register:
+      requests: 5
+      window-seconds: 60
+    public-get:
+      requests: 120
+      window-seconds: 60
+    authenticated:
+      requests: 200
+      window-seconds: 60
+
+  # =============================================================================
+  # Security Headers - Production (STRICT)
+  # =============================================================================
+  security:
+    headers:
+      enabled: true
+      content-type-options: true
+      frame-options: DENY
+      referrer-policy: strict-origin-when-cross-origin
+      content-security-policy: "default-src 'none'; frame-ancestors 'none'"
+      permissions-policy: "geolocation=(), camera=(), microphone=()"
+      xss-protection: true
+      hsts:
+        enabled: true  # HSTS enabled for production HTTPS
+        max-age-seconds: 31536000  # 1 year
+        include-subdomains: true
+        preload: true
+
+  # AI Configuration - Production
+  ai:
+    provider: ${AI_PROVIDER:openai}
+    enabled: true
+    http:
+      logging-enabled: false  # Disable verbose logging in production
+
+  # Maps Configuration - Production
+  maps:
+    enabled: ${MAPS_ENABLED:true}
+    provider: ${MAPS_PROVIDER:google}
+
 
