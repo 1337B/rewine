@@ -307,18 +307,80 @@ curl -X GET "http://localhost:8080/api/v1/wines/{wineId}/ai-profile/status?langu
 
 ### AI Provider Configuration
 
-The AI provider can be configured via environment variable:
+The AI adapter layer supports multiple providers with clean interfaces, configurable timeouts, and automatic retry logic.
+
+#### Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `AI_PROVIDER` | `mock` | AI provider: `mock` (development) or `openai` |
+| `AI_ENABLED` | `true` | Enable/disable AI features |
+| `OPENAI_API_KEY` | `not-configured` | OpenAI API key (required for `openai` provider) |
+| `OPENAI_BASE_URL` | `https://api.openai.com/v1` | OpenAI API base URL |
+| `OPENAI_MODEL` | `gpt-4o-mini` | OpenAI model to use |
+| `OPENAI_MAX_TOKENS` | `2000` | Maximum tokens for completion |
+| `OPENAI_TEMPERATURE` | `0.7` | Temperature for generation (0.0-2.0) |
+| `AI_CONNECT_TIMEOUT` | `10` | Connection timeout in seconds |
+| `AI_READ_TIMEOUT` | `60` | Read timeout in seconds |
+| `AI_MAX_RETRIES` | `2` | Maximum retries for transient errors |
+| `AI_HTTP_LOGGING` | `true` | Enable HTTP request/response logging |
+
+#### Configuration Example
 
 ```yaml
 # application.yml
 rewine:
   ai:
     provider: ${AI_PROVIDER:mock}
+    enabled: ${AI_ENABLED:true}
+    openai:
+      base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
+      api-key: ${OPENAI_API_KEY:not-configured}
+      model: ${OPENAI_MODEL:gpt-4o-mini}
+      max-tokens: ${OPENAI_MAX_TOKENS:2000}
+      temperature: ${OPENAI_TEMPERATURE:0.7}
+    http:
+      connect-timeout-seconds: ${AI_CONNECT_TIMEOUT:10}
+      read-timeout-seconds: ${AI_READ_TIMEOUT:60}
+      max-retries: ${AI_MAX_RETRIES:2}
+      logging-enabled: ${AI_HTTP_LOGGING:true}
 ```
+
+#### Provider Behavior
+
+| Provider | API Key Required | Behavior |
+|----------|-----------------|----------|
+| `mock` | No | Returns deterministic mock responses (development) |
+| `openai` | Yes | Calls OpenAI API; falls back to mock if API key missing |
+
+#### Running with OpenAI
+
+```bash
+# Export the API key
+export OPENAI_API_KEY="sk-your-api-key-here"
+export AI_PROVIDER="openai"
+
+# Run the application
+mvn spring-boot:run
+```
+
+#### Architecture
+
+The AI adapter layer follows clean architecture principles:
+
+- **IAiClient**: Client layer interface for AI operations (pure HTTP adapter)
+- **IWinePromptService**: Service layer interface for building AI prompts (business logic)
+- **IHttpClientFactory**: Factory for configured HTTP clients with timeouts/retry
+- **OpenAiClientImpl**: OpenAI implementation with fallback to mock
+- **MockAiClient**: Standalone mock implementation for development
+
+**Design Decision**: Prompt building is placed in the service layer (`IWinePromptService`) rather than the client layer because:
+- It encodes domain knowledge about wines (what attributes matter, how to describe them)
+- It makes the client layer a pure HTTP adapter
+- It's easier to test business logic independently
+- It provides flexibility if switching AI providers
+
+All orchestrators use `IAiClient` interface only, never direct HTTP calls.
 
 **Note**: The `mock` provider generates realistic sample profiles for development without requiring external API keys.
 

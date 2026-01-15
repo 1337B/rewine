@@ -69,11 +69,11 @@
         </dependency>
 
 
-        <!-- H2 Database - Test scope only -->
+        <!-- H2 Database - for test profile and unit tests -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <scope>test</scope>
+            <scope>runtime</scope>
         </dependency>
 
 

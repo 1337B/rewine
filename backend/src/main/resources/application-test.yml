@@ -1,0 +1,75 @@
+# =============================================================================
+# Rewine Backend - Test Configuration (for manual testing with H2)
+# =============================================================================
+# This profile allows running the application manually with H2 for quick testing
+# Usage: mvn spring-boot:run -Dspring-boot.run.profiles=test
+
+spring:
+  # Database Configuration - H2 In-Memory
+  datasource:
+    url: jdbc:h2:mem:rewinedb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+    hikari:
+      pool-name: RewineTestHikariPool
+      maximum-pool-size: 5
+      minimum-idle: 2
+
+  # Disable SQL init (let Hibernate handle schema)
+  sql:
+    init:
+      mode: never
+
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    defer-datasource-initialization: false
+    database-platform: org.hibernate.dialect.H2Dialect
+    properties:
+      hibernate:
+        format_sql: false
+
+  # Disable Flyway for H2 test mode
+  flyway:
+    enabled: false
+
+  # Enable H2 Console for debugging
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: false
+
+# JWT Configuration for tests
+jwt:
+  issuer: rewine-backend-test
+  secret: test-secret-key-for-jwt-signing-minimum-32-chars-long
+  access-token-expiration: 900000
+  refresh-token-expiration: 604800000
+
+# AI Configuration - Mock provider for tests (no real API calls)
+rewine:
+  ai:
+    provider: mock
+    enabled: true
+    openai:
+      api-key:
+      model: gpt-4o-mini
+    http:
+      connect-timeout-seconds: 5
+      read-timeout-seconds: 30
+      max-retries: 1
+      logging-enabled: false
+
+# Logging - less verbose for tests
+logging:
+  level:
+    root: INFO
+    com.rewine: DEBUG
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+
