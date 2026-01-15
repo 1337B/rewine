@@ -116,3 +116,21 @@ rewine:
       max-retries: 2
       logging-enabled: true
 
+  # =============================================================================
+  # Google Maps Configuration - Local Development
+  # =============================================================================
+  # For route previews, geocoding, and map features.
+  # If no API key is set, fallback implementations (OpenStreetMap, Haversine) are used.
+  #
+  # Get your API key from: https://console.cloud.google.com/apis/credentials
+  # Enable: Maps Static API, Directions API, Geocoding API
+  # =============================================================================
+  maps:
+    enabled: ${GOOGLE_MAPS_ENABLED:true}
+    provider: google
+    # Set your API key here for local dev, or use GOOGLE_MAPS_API_KEY env var
+    api-key: ${GOOGLE_MAPS_API_KEY:}
+    default-map-style: roadmap
+    default-image-width: 640
+    default-image-height: 400
+

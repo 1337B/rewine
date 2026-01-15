@@ -137,3 +137,12 @@ rewine:
       max-retries: ${AI_MAX_RETRIES:2}
       logging-enabled: ${AI_HTTP_LOGGING:true}
 
+  # Maps Configuration - Common Defaults
+  maps:
+    enabled: ${MAPS_ENABLED:false}
+    provider: ${MAPS_PROVIDER:openstreetmap}
+    api-key: ${GOOGLE_MAPS_API_KEY:}
+    default-map-style: roadmap
+    default-image-width: 640
+    default-image-height: 400
+

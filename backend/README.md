@@ -464,6 +464,63 @@ curl -X POST "http://localhost:8080/api/v1/wines/compare" \
 
 ---
 
+## Google Maps Integration
+
+The platform integrates with Google Maps APIs for wine route features including static map previews, route calculations, and geocoding.
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `GOOGLE_MAPS_ENABLED` | `true` | Enable/disable Google Maps features |
+| `GOOGLE_MAPS_API_KEY` | (empty) | Google Maps API key |
+
+### How It Works
+
+- **With API Key**: Uses Google Maps Static API for route previews, Directions API for route calculations
+- **Without API Key**: Falls back to OpenStreetMap for static maps and Haversine formula for distance calculations
+
+### Setting Up Google Maps
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a project or select an existing one
+3. Enable the following APIs:
+   - **Maps Static API** - For route preview images
+   - **Directions API** - For route calculations
+   - **Geocoding API** - For address lookup
+4. Go to "APIs & Services" → "Credentials" → "Create Credentials" → "API Key"
+5. (Recommended) Restrict the API key:
+   - Application restrictions: IP addresses or HTTP referrers
+   - API restrictions: Only the APIs listed above
+
+### Running with Google Maps
+
+```bash
+# Export the API key
+export GOOGLE_MAPS_API_KEY="AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+export GOOGLE_MAPS_ENABLED="true"
+
+# Run the application
+mvn spring-boot:run
+```
+
+Or add to `.env` file:
+```dotenv
+GOOGLE_MAPS_ENABLED=true
+GOOGLE_MAPS_API_KEY=your-google-maps-api-key-here
+```
+
+### Fallback Behavior
+
+When Google Maps API is not configured:
+- **Static Maps**: Uses OpenStreetMap static map service
+- **Distance/Duration**: Uses Haversine formula with average speed estimates
+- **Geocoding**: Returns placeholder Mendoza, Argentina coordinates
+
+This ensures the application runs without Google Maps credentials for development.
+
+---
+
 ## Authentication
 
 The API uses **JWT (JSON Web Token)** authentication with refresh token rotation.
