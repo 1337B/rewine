@@ -73,6 +73,192 @@ public class MockAiClient implements IAiClient {
         return "Mock";
     }
 
+    @Override
+    public Map<String, Object> generateWineComparison(WineEntity wineA, WineEntity wineB, String language) {
+        LOGGER.info("Generating mock AI comparison for wines: {} vs {} (IDs: {} vs {}), language: {}",
+                wineA.getName(), wineB.getName(), wineA.getId(), wineB.getId(), language);
+
+        Map<String, Object> comparison = new HashMap<>();
+        boolean isSpanish = language.startsWith("es");
+
+        // Generate summary
+        comparison.put("summary", generateComparisonSummary(wineA, wineB, isSpanish));
+
+        // Generate attribute comparison
+        comparison.put("attributeComparison", generateAttributeComparison(wineA, wineB, isSpanish));
+
+        // Generate similarities
+        comparison.put("similarities", generateSimilarities(wineA, wineB, isSpanish));
+
+        // Generate differences
+        comparison.put("differences", generateDifferences(wineA, wineB, isSpanish));
+
+        // Generate food pairing comparison
+        comparison.put("foodPairings", generateFoodPairingComparison(wineA, wineB, isSpanish));
+
+        // Generate occasion comparison
+        comparison.put("occasions", generateOccasionComparison(wineA, wineB, isSpanish));
+
+        // Generate value assessment
+        comparison.put("valueAssessment", generateValueAssessment(wineA, wineB, isSpanish));
+
+        // Generate recommendation
+        comparison.put("recommendation", generateRecommendation(wineA, wineB, isSpanish));
+
+        LOGGER.debug("Generated mock comparison with {} sections for wines: {} vs {}",
+                comparison.size(), wineA.getName(), wineB.getName());
+
+        return comparison;
+    }
+
+    private String generateComparisonSummary(WineEntity wineA, WineEntity wineB, boolean isSpanish) {
+        if (isSpanish) {
+            return String.format(
+                "Comparando %s con %s, encontramos dos vinos con personalidades únicas. "
+                + "Ambos representan excelentes ejemplos de la tradición vitivinícola, "
+                + "pero ofrecen experiencias distintas para el paladar del conocedor.",
+                wineA.getName(), wineB.getName()
+            );
+        } else {
+            return String.format(
+                "Comparing %s with %s, we find two wines with unique personalities. "
+                + "Both represent excellent examples of winemaking tradition, "
+                + "but offer distinct experiences for the connoisseur's palate.",
+                wineA.getName(), wineB.getName()
+            );
+        }
+    }
+
+    private Map<String, Object> generateAttributeComparison(WineEntity wineA, WineEntity wineB, boolean isSpanish) {
+        Map<String, Object> attributes = new HashMap<>();
+
+        attributes.put("appearance", createAttributeMap(
+                isSpanish ? "Color profundo con reflejos brillantes" : "Deep color with brilliant reflections",
+                isSpanish ? "Color intenso con tonos característicos" : "Intense color with characteristic tones",
+                isSpanish ? "Ambos presentan excelente claridad" : "Both show excellent clarity"
+        ));
+
+        attributes.put("aroma", createAttributeMap(
+                isSpanish ? "Aromas frutales con notas especiadas" : "Fruity aromas with spicy notes",
+                isSpanish ? "Bouquet complejo con matices florales" : "Complex bouquet with floral nuances",
+                isSpanish ? "Intensidades aromáticas similares" : "Similar aromatic intensities"
+        ));
+
+        attributes.put("palate", createAttributeMap(
+                isSpanish ? "Estructura robusta con taninos firmes" : "Robust structure with firm tannins",
+                isSpanish ? "Cuerpo elegante con acidez equilibrada" : "Elegant body with balanced acidity",
+                isSpanish ? "Diferentes perfiles de boca" : "Different palate profiles"
+        ));
+
+        attributes.put("finish", createAttributeMap(
+                isSpanish ? "Final largo y persistente" : "Long and persistent finish",
+                isSpanish ? "Retrogusto prolongado y agradable" : "Prolonged and pleasant aftertaste",
+                isSpanish ? "Ambos con finales memorables" : "Both with memorable finishes"
+        ));
+
+        return attributes;
+    }
+
+    private Map<String, String> createAttributeMap(String wineA, String wineB, String comparison) {
+        Map<String, String> attr = new HashMap<>();
+        attr.put("wineA", wineA);
+        attr.put("wineB", wineB);
+        attr.put("comparison", comparison);
+        return attr;
+    }
+
+    private List<String> generateSimilarities(WineEntity wineA, WineEntity wineB, boolean isSpanish) {
+        List<String> similarities = new ArrayList<>();
+        if (isSpanish) {
+            similarities.add("Ambos vinos provienen de viñedos de alta calidad");
+            similarities.add("Comparten un perfil de envejecimiento similar");
+            similarities.add("Excelente potencial de guarda");
+            similarities.add("Ideales para acompañar carnes");
+        } else {
+            similarities.add("Both wines come from high-quality vineyards");
+            similarities.add("They share a similar aging profile");
+            similarities.add("Excellent cellaring potential");
+            similarities.add("Ideal for pairing with meats");
+        }
+        return similarities;
+    }
+
+    private List<String> generateDifferences(WineEntity wineA, WineEntity wineB, boolean isSpanish) {
+        List<String> differences = new ArrayList<>();
+        if (isSpanish) {
+            differences.add(String.format("%s tiene mayor intensidad tánica", wineA.getName()));
+            differences.add(String.format("%s presenta más notas frutales", wineB.getName()));
+            differences.add("Diferentes perfiles de acidez");
+            differences.add("Variaciones en el cuerpo y estructura");
+        } else {
+            differences.add(String.format("%s has greater tannic intensity", wineA.getName()));
+            differences.add(String.format("%s presents more fruity notes", wineB.getName()));
+            differences.add("Different acidity profiles");
+            differences.add("Variations in body and structure");
+        }
+        return differences;
+    }
+
+    private Map<String, Object> generateFoodPairingComparison(WineEntity wineA, WineEntity wineB, boolean isSpanish) {
+        Map<String, Object> pairings = new HashMap<>();
+        if (isSpanish) {
+            pairings.put("wineA", List.of("Asado argentino", "Cordero al horno", "Quesos curados"));
+            pairings.put("wineB", List.of("Pasta con ragú", "Ternera a la parrilla", "Hongos salteados"));
+            pairings.put("shared", List.of("Carnes rojas", "Empanadas", "Quesos semiduros"));
+        } else {
+            pairings.put("wineA", List.of("Argentine asado", "Roasted lamb", "Aged cheeses"));
+            pairings.put("wineB", List.of("Pasta with ragú", "Grilled beef", "Sautéed mushrooms"));
+            pairings.put("shared", List.of("Red meats", "Empanadas", "Semi-hard cheeses"));
+        }
+        return pairings;
+    }
+
+    private Map<String, Object> generateOccasionComparison(WineEntity wineA, WineEntity wineB, boolean isSpanish) {
+        Map<String, Object> occasions = new HashMap<>();
+        if (isSpanish) {
+            occasions.put("wineA", List.of("Celebraciones formales", "Cenas de negocios", "Aniversarios"));
+            occasions.put("wineB", List.of("Reuniones con amigos", "Asados de fin de semana", "Cenas románticas"));
+        } else {
+            occasions.put("wineA", List.of("Formal celebrations", "Business dinners", "Anniversaries"));
+            occasions.put("wineB", List.of("Gatherings with friends", "Weekend barbecues", "Romantic dinners"));
+        }
+        return occasions;
+    }
+
+    private String generateValueAssessment(WineEntity wineA, WineEntity wineB, boolean isSpanish) {
+        if (isSpanish) {
+            return "Ambos vinos ofrecen una excelente relación calidad-precio, "
+                + "representando el valor de sus respectivas bodegas y regiones.";
+        } else {
+            return "Both wines offer excellent value for money, "
+                + "representing the worth of their respective wineries and regions.";
+        }
+    }
+
+    private Map<String, String> generateRecommendation(WineEntity wineA, WineEntity wineB, boolean isSpanish) {
+        Map<String, String> recommendation = new HashMap<>();
+        if (isSpanish) {
+            recommendation.put("chooseWineAIf", String.format(
+                    "Elige %s si prefieres vinos con mayor estructura y taninos pronunciados",
+                    wineA.getName()));
+            recommendation.put("chooseWineBIf", String.format(
+                    "Elige %s si buscas un vino más accesible y frutal",
+                    wineB.getName()));
+            recommendation.put("overallNote",
+                    "Ambos son excelentes opciones que satisfarán a cualquier amante del vino");
+        } else {
+            recommendation.put("chooseWineAIf", String.format(
+                    "Choose %s if you prefer wines with more structure and pronounced tannins",
+                    wineA.getName()));
+            recommendation.put("chooseWineBIf", String.format(
+                    "Choose %s if you're looking for a more accessible and fruity wine",
+                    wineB.getName()));
+            recommendation.put("overallNote",
+                    "Both are excellent choices that will satisfy any wine lover");
+        }
+        return recommendation;
+    }
+
     private String generateSummary(WineEntity wine, String language) {
         boolean isSpanish = language.startsWith("es");
         String wineName = wine.getName();
