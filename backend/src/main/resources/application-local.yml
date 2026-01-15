@@ -86,3 +86,33 @@ logging:
     org.flywaydb: INFO
     com.zaxxer.hikari: INFO
 
+# =============================================================================
+# AI Configuration - Local Development
+# =============================================================================
+# For local development, you can set the OpenAI API key here directly or via
+# environment variable. If no key is set, the mock provider will be used.
+#
+# To enable real OpenAI calls:
+#   1. Set AI_PROVIDER=openai (or change provider below to: openai)
+#   2. Set OPENAI_API_KEY environment variable, or update api-key below
+#
+# Get your API key from: https://platform.openai.com/api-keys
+# =============================================================================
+rewine:
+  ai:
+    # Use 'mock' for development without OpenAI costs, 'openai' for real AI
+    provider: ${AI_PROVIDER:openai}
+    enabled: true
+    openai:
+      base-url: https://api.openai.com/v1
+      # Set your API key here for local dev, or use OPENAI_API_KEY env var
+      api-key: ${OPENAI_API_KEY:}
+      model: gpt-4o-mini
+      max-tokens: 2000
+      temperature: 0.7
+    http:
+      connect-timeout-seconds: 10
+      read-timeout-seconds: 60
+      max-retries: 2
+      logging-enabled: true
+
