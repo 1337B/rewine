@@ -44,7 +44,13 @@ public enum ErrorCode {
     ALREADY_REGISTERED("E6002", "Already registered for event"),
 
     // Wine route errors (7xxx)
-    WINE_ROUTE_NOT_FOUND("E7000", "Wine route not found");
+    WINE_ROUTE_NOT_FOUND("E7000", "Wine route not found"),
+
+    // External service errors (8xxx)
+    SERVICE_UNAVAILABLE("E8000", "Service is currently unavailable"),
+    AI_SERVICE_UNAVAILABLE("E8001", "AI service is not configured or unavailable"),
+    MAPS_SERVICE_UNAVAILABLE("E8002", "Maps service is not configured or unavailable"),
+    EXTERNAL_SERVICE_ERROR("E8003", "External service error");
 
     private final String code;
     private final String defaultMessage;

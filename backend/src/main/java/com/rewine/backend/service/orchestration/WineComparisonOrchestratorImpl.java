@@ -3,6 +3,7 @@ package com.rewine.backend.service.orchestration;
 import com.rewine.backend.client.IAiClient;
 import com.rewine.backend.dto.response.WineComparisonResponse;
 import com.rewine.backend.exception.ResourceNotFoundException;
+import com.rewine.backend.exception.ServiceUnavailableException;
 import com.rewine.backend.model.entity.WineComparisonEntity;
 import com.rewine.backend.model.entity.WineEntity;
 import com.rewine.backend.repository.IWineComparisonRepository;
@@ -132,7 +133,7 @@ public class WineComparisonOrchestratorImpl implements IWineComparisonOrchestrat
         // Step 2: Check if AI service is available
         if (!aiClient.isAvailable()) {
             LOGGER.error("AI service is not available. Provider: {}", aiClient.getProviderName());
-            throw new IllegalStateException("AI service is currently unavailable");
+            throw ServiceUnavailableException.forAi();
         }
 
         LOGGER.info("Using AI provider: {}", aiClient.getProviderName());

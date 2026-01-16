@@ -98,12 +98,69 @@ public class MapsProperties {
         this.defaultImageHeight = defaultImageHeight;
     }
 
+    /**
+     * Checks if the API key is configured and non-empty.
+     *
+     * @return true if API key is present
+     */
+    public boolean isApiKeyConfigured() {
+        return Objects.nonNull(apiKey) && !apiKey.isBlank();
+    }
+
+    /**
+     * Checks if Maps features are fully configured and enabled.
+     * For Google provider, this requires an API key.
+     * For OpenStreetMap, no key is needed.
+     *
+     * @return true if Maps can make real calls
+     */
+    public boolean isConfiguredAndEnabled() {
+        if (!enabled) {
+            return false;
+        }
+        if ("openstreetmap".equalsIgnoreCase(provider)) {
+            return true; // OSM doesn't require an API key
+        }
+        if ("google".equalsIgnoreCase(provider)) {
+            return isApiKeyConfigured();
+        }
+        return false;
+    }
+
+    /**
+     * Checks if Google provider is configured.
+     *
+     * @return true if provider is google
+     */
+    public boolean isGoogleProvider() {
+        return "google".equalsIgnoreCase(provider);
+    }
+
+    /**
+     * Checks if Maps should use fallback/stub responses.
+     * Fallback is used when:
+     * - enabled is false
+     * - provider is google but API key is not configured
+     *
+     * @return true if fallback responses should be used
+     */
+    public boolean shouldUseFallback() {
+        if (!enabled) {
+            return true;
+        }
+        if ("google".equalsIgnoreCase(provider) && !isApiKeyConfigured()) {
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
+        // SECURITY: Never log API keys
         return "MapsProperties{"
                 + "enabled=" + enabled
                 + ", provider='" + provider + '\''
-                + ", apiKeyConfigured=" + (Objects.nonNull(apiKey) && !apiKey.isBlank())
+                + ", apiKeyConfigured=" + isApiKeyConfigured()
                 + ", defaultMapStyle='" + defaultMapStyle + '\''
                 + ", defaultImageWidth=" + defaultImageWidth
                 + ", defaultImageHeight=" + defaultImageHeight

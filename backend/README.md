@@ -1053,8 +1053,70 @@ backend/
 
 ---
 
+## External Provider Configuration
+
+The application uses external services for AI-powered features and maps. These services are designed to gracefully degrade when not configured.
+
+### Provider Availability Handling
+
+| Provider | Required | Behavior When Disabled |
+|----------|----------|------------------------|
+| **OpenAI** | No | Returns deterministic mock responses for wine profiles and comparisons |
+| **Google Maps** | No | Uses OpenStreetMap static maps and Haversine distance calculations |
+
+### Configuration Priority
+
+1. **Environment variables** (highest priority)
+2. **application-{profile}.yml** values
+3. **Default values** (fallback/mock mode)
+
+### Enabling External Providers
+
+**For OpenAI AI features:**
+```bash
+export AI_PROVIDER=openai
+export OPENAI_API_KEY=sk-your-api-key-here
+```
+
+**For Google Maps features:**
+```bash
+export GOOGLE_MAPS_ENABLED=true
+export GOOGLE_MAPS_API_KEY=AIza-your-api-key-here
+```
+
+### Provider Behavior Details
+
+#### AI Provider States
+
+| Configuration | Behavior |
+|---------------|----------|
+| `AI_ENABLED=false` | AI endpoints return 503 Service Unavailable |
+| `AI_PROVIDER=mock` | Returns deterministic mock wine profiles |
+| `AI_PROVIDER=openai` + no key | Falls back to mock with warning log |
+| `AI_PROVIDER=openai` + valid key | Makes real OpenAI API calls |
+
+#### Maps Provider States
+
+| Configuration | Behavior |
+|---------------|----------|
+| `GOOGLE_MAPS_ENABLED=false` | Uses OpenStreetMap and Haversine calculations |
+| No API key configured | Uses placeholder images, Haversine distances |
+| Valid API key | Uses Google Maps Static API, Directions API |
+
+### Security Notes
+
+- **API keys are never logged**, even with DEBUG logging enabled
+- Properties classes override `toString()` to mask sensitive values
+- Use environment variables or secrets managers for production
+
+See [CREDENTIALS_AND_ACCOUNTS.md](../docs/CREDENTIALS_AND_ACCOUNTS.md) for complete credential setup guide.
+
+---
+
 ## Related Documentation
 
 - [Architecture Guide](ARCHITECTURE.md) - Detailed architecture documentation
 - [API Documentation](http://localhost:8080/api/v1/swagger-ui.html) - Interactive API docs (when running)
+- [Credentials & Accounts](../docs/CREDENTIALS_AND_ACCOUNTS.md) - Environment variables and API keys setup
+- [Environments](../docs/ENVIRONMENTS.md) - Environment configuration details
 

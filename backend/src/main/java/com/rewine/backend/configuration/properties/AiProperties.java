@@ -101,6 +101,45 @@ public class AiProperties {
     }
 
     /**
+     * Checks if AI features are fully configured and enabled.
+     * This means:
+     * - enabled flag is true
+     * - if provider is openai, the API key must be configured
+     *
+     * @return true if AI can make real calls (not mock)
+     */
+    public boolean isConfiguredAndEnabled() {
+        if (!enabled) {
+            return false;
+        }
+        if ("mock".equalsIgnoreCase(provider)) {
+            return true; // Mock is always available when enabled
+        }
+        if (isOpenAiProvider()) {
+            return isOpenAiConfigured();
+        }
+        return false;
+    }
+
+    /**
+     * Checks if AI features should use mock responses.
+     * Mock is used when:
+     * - provider is explicitly set to mock
+     * - provider is openai but API key is not configured
+     *
+     * @return true if mock responses should be used
+     */
+    public boolean shouldUseMock() {
+        if ("mock".equalsIgnoreCase(provider)) {
+            return true;
+        }
+        if (isOpenAiProvider() && !isOpenAiConfigured()) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * OpenAI-specific configuration.
      */
     public static class OpenAiConfig {

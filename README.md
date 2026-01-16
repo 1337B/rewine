@@ -49,40 +49,82 @@ rewine/
 - **npm**: v10.x or higher (comes with Node.js)
 - **Java**: 21 (LTS) (for backend)
 - **Maven**: 3.9+ (for backend)
-- **Docker**: (optional) for containerized builds
+- **Docker**: Required for PostgreSQL database
 
-### Frontend Development
+### Local Development (Full Stack)
+
+**Option 1: Using Docker Compose (Recommended)**
 
 ```bash
-# Navigate to frontend
+# Terminal 1: Start PostgreSQL + Backend
+cd infra
+docker-compose up -d
+
+# Terminal 2: Start Frontend
 cd frontend
-
-# Install dependencies
-npm install
-
-# Start development server (with mock API)
-npm run dev:mock
-
-# Or start without mocks (requires backend)
+cp .env.example .env.local  # First time only
+npm install                  # First time only
 npm run dev
 ```
 
-The frontend will be available at `http://localhost:3000`.
-
-### Backend Development
+**Option 2: Manual Setup**
 
 ```bash
-# Navigate to backend
+# Terminal 1: Start PostgreSQL
+docker run -d --name rewine-postgres \
+  -e POSTGRES_DB=rewine \
+  -e POSTGRES_USER=rewine \
+  -e POSTGRES_PASSWORD=rewine_secret \
+  -p 5432:5432 \
+  postgres:15
+
+# Terminal 2: Start Backend
+cd backend
+mvn spring-boot:run -Dspring-boot.run.profiles=local
+
+# Terminal 3: Start Frontend
+cd frontend
+cp .env.example .env.local  # First time only
+npm install                  # First time only
+npm run dev
+```
+
+**Access Points:**
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:8080/api/v1
+- API Health: http://localhost:8080/api/v1/actuator/health
+
+**Test Users (local only):**
+| Email | Password | Role |
+|-------|----------|------|
+| admin@rewine.local | Rewine123! | ADMIN |
+| partner@rewine.local | Rewine123! | PARTNER |
+| user@rewine.local | Rewine123! | USER |
+
+### Frontend Development (Mock API - No Backend Required)
+
+```bash
+cd frontend
+npm install
+npm run dev:mock
+```
+
+The frontend will be available at `http://localhost:3000` with mocked API responses.
+
+### Backend Development (Standalone)
+
+```bash
 cd backend
 
-# Build the project
-mvn clean install
+# With PostgreSQL (requires Docker)
+docker run -d --name rewine-postgres \
+  -e POSTGRES_DB=rewine \
+  -e POSTGRES_USER=rewine \
+  -e POSTGRES_PASSWORD=rewine_secret \
+  -p 5432:5432 \
+  postgres:15
 
-# Run with H2 in-memory database (default)
-mvn spring-boot:run
-
-# Or run with PostgreSQL
-mvn spring-boot:run -Dspring-boot.run.profiles=postgres
+mvn spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 The API will be available at `http://localhost:8080/api/v1`.
@@ -90,11 +132,11 @@ The API will be available at `http://localhost:8080/api/v1`.
 ### Full Stack Development
 
 ```bash
-# Terminal 1: Start backend
+# Terminal 1: Start backend (with PostgreSQL running)
 cd backend
-mvn spring-boot:run
+mvn spring-boot:run -Dspring-boot.run.profiles=local
 
-# Terminal 2: Start frontend (without mocks)
+# Terminal 2: Start frontend (connected to backend)
 cd frontend
 npm run dev
 ```

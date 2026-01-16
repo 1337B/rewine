@@ -4,6 +4,7 @@ import com.rewine.backend.client.IAiClient;
 import com.rewine.backend.dto.common.AiCacheStatusResponse;
 import com.rewine.backend.dto.response.WineAiProfileResponse;
 import com.rewine.backend.exception.ResourceNotFoundException;
+import com.rewine.backend.exception.ServiceUnavailableException;
 import com.rewine.backend.model.entity.WineAiProfileEntity;
 import com.rewine.backend.model.entity.WineEntity;
 import com.rewine.backend.model.enums.AiProfileStatus;
@@ -148,7 +149,7 @@ public class WineProfileOrchestratorImpl implements IWineProfileOrchestrator {
         // Step 2: Check if AI service is available
         if (!aiClient.isAvailable()) {
             LOGGER.error("AI service is not available. Provider: {}", aiClient.getProviderName());
-            throw new IllegalStateException("AI service is currently unavailable");
+            throw ServiceUnavailableException.forAi();
         }
 
         LOGGER.info("Using AI provider: {}", aiClient.getProviderName());
