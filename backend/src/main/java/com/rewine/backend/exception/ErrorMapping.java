@@ -18,6 +18,8 @@ public class ErrorMapping {
         ERROR_STATUS_MAP.put(ErrorCode.VALIDATION_ERROR, HttpStatus.BAD_REQUEST);
         ERROR_STATUS_MAP.put(ErrorCode.RESOURCE_NOT_FOUND, HttpStatus.NOT_FOUND);
         ERROR_STATUS_MAP.put(ErrorCode.RESOURCE_ALREADY_EXISTS, HttpStatus.CONFLICT);
+        ERROR_STATUS_MAP.put(ErrorCode.NOT_FOUND, HttpStatus.NOT_FOUND);
+        ERROR_STATUS_MAP.put(ErrorCode.CONFLICT, HttpStatus.CONFLICT);
 
         // Authentication errors
         ERROR_STATUS_MAP.put(ErrorCode.AUTHENTICATION_FAILED, HttpStatus.UNAUTHORIZED);
@@ -26,6 +28,8 @@ public class ErrorMapping {
         ERROR_STATUS_MAP.put(ErrorCode.TOKEN_INVALID, HttpStatus.UNAUTHORIZED);
         ERROR_STATUS_MAP.put(ErrorCode.UNAUTHORIZED, HttpStatus.UNAUTHORIZED);
         ERROR_STATUS_MAP.put(ErrorCode.FORBIDDEN, HttpStatus.FORBIDDEN);
+        ERROR_STATUS_MAP.put(ErrorCode.ACCESS_DENIED, HttpStatus.FORBIDDEN);
+        ERROR_STATUS_MAP.put(ErrorCode.AUTHENTICATION_REQUIRED, HttpStatus.UNAUTHORIZED);
 
         // User errors
         ERROR_STATUS_MAP.put(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
@@ -49,6 +53,12 @@ public class ErrorMapping {
 
         // Wine route errors
         ERROR_STATUS_MAP.put(ErrorCode.WINE_ROUTE_NOT_FOUND, HttpStatus.NOT_FOUND);
+
+        // External service errors
+        ERROR_STATUS_MAP.put(ErrorCode.SERVICE_UNAVAILABLE, HttpStatus.SERVICE_UNAVAILABLE);
+        ERROR_STATUS_MAP.put(ErrorCode.AI_SERVICE_UNAVAILABLE, HttpStatus.NOT_IMPLEMENTED);
+        ERROR_STATUS_MAP.put(ErrorCode.MAPS_SERVICE_UNAVAILABLE, HttpStatus.NOT_IMPLEMENTED);
+        ERROR_STATUS_MAP.put(ErrorCode.EXTERNAL_SERVICE_ERROR, HttpStatus.BAD_GATEWAY);
     }
 
     /**

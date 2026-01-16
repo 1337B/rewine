@@ -325,12 +325,17 @@ public class EventServiceImpl implements IEventService {
     @Override
     public boolean canModifyEvent(UUID eventId, UUID userId, boolean isAdmin) {
         if (isAdmin) {
+            // Admins can modify any event, but we still need to verify the event exists
+            if (!eventRepository.existsById(eventId)) {
+                throw ResourceNotFoundException.forEvent(eventId);
+            }
             return true;
         }
 
-        return eventRepository.findById(eventId)
-                .map(event -> event.isOrganizer(userId))
-                .orElse(false);
+        EventEntity event = eventRepository.findById(eventId)
+                .orElseThrow(() -> ResourceNotFoundException.forEvent(eventId));
+
+        return event.isOrganizer(userId);
     }
 
     /**

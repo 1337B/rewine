@@ -1,20 +1,19 @@
 package com.rewine.backend.service.impl;
 
+import com.rewine.backend.configuration.security.CustomUserDetails;
 import com.rewine.backend.model.entity.UserEntity;
 import com.rewine.backend.repository.IUserRepository;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 /**
  * UserDetailsService implementation for Spring Security.
+ * Returns CustomUserDetails to include user ID for downstream use.
  */
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -33,19 +32,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                         "User not found with username or email: " + username
                 ));
 
-        List<SimpleGrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
-                .collect(Collectors.toList());
-
-        return new User(
-                user.getUsername(),
-                user.getPasswordHash(),
-                user.isEnabled(),
-                true, // accountNonExpired
-                true, // credentialsNonExpired
-                !user.isLocked(), // accountNonLocked
-                authorities
-        );
+        return new CustomUserDetails(user);
     }
 
     /**
@@ -57,24 +44,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
      */
     @Transactional(readOnly = true)
     public UserDetails loadUserById(String userId) throws UsernameNotFoundException {
-        UserEntity user = userRepository.findById(java.util.UUID.fromString(userId))
+        UserEntity user = userRepository.findById(UUID.fromString(userId))
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "User not found with id: " + userId
                 ));
 
-        List<SimpleGrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
-                .collect(Collectors.toList());
-
-        return new User(
-                user.getUsername(),
-                user.getPasswordHash(),
-                user.isEnabled(),
-                true,
-                true,
-                !user.isLocked(),
-                authorities
-        );
+        return new CustomUserDetails(user);
     }
 }
 

@@ -211,6 +211,7 @@ Once running, these endpoints are available:
 | `/api/v1/api-docs` | GET | OpenAPI JSON spec |
 | `/api/v1/actuator/health` | GET | Actuator health endpoint |
 | `/api/v1/actuator/info` | GET | Actuator info endpoint |
+| `/api/v1/actuator/prometheus` | GET | Prometheus metrics (for monitoring) |
 
 ### Authentication Endpoints
 
@@ -939,6 +940,147 @@ mvn verify
 1. Install "Extension Pack for Java"
 2. Install "Spring Boot Extension Pack"
 3. Open the `backend` folder
+
+---
+
+## Observability
+
+### Prometheus Metrics
+
+The backend exposes Prometheus metrics for monitoring and alerting.
+
+#### Endpoint
+
+```
+GET /api/v1/actuator/prometheus
+```
+
+#### Test Locally
+
+```bash
+curl http://localhost:8080/api/v1/actuator/prometheus
+```
+
+#### Available Metrics
+
+| Metric | Description |
+|--------|-------------|
+| `jvm_memory_*` | JVM heap/non-heap memory usage |
+| `jvm_gc_*` | Garbage collection statistics |
+| `jvm_threads_*` | Thread counts and states |
+| `http_server_requests_*` | HTTP request latency and counts |
+| `hikaricp_connections_*` | Database connection pool stats |
+| `logback_events_*` | Log events by level |
+| `process_cpu_*` | Process CPU usage |
+| `system_cpu_*` | System CPU usage |
+
+#### Kubernetes Prometheus Annotations
+
+The deployment is pre-configured with Prometheus scraping annotations:
+
+```yaml
+annotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8080"
+  prometheus.io/path: "/api/v1/actuator/prometheus"
+```
+
+### Logging
+
+#### Log Format
+
+**Development (Console):**
+```
+2026-01-16 10:30:45.123 [main] [req-abc123] [trace-xyz] [span-123] [user-1] INFO c.r.b.MyService - Processing request
+```
+
+**Production (JSON):**
+```json
+{
+  "@timestamp": "2026-01-16T10:30:45.123Z",
+  "message": "Processing request",
+  "level": "INFO",
+  "requestId": "req-abc123",
+  "traceId": "trace-xyz",
+  "spanId": "span-123",
+  "userId": "user-1",
+  "application": "rewine-backend"
+}
+```
+
+#### MDC Fields
+
+The logging automatically includes these MDC fields (when available):
+
+| Field | Description |
+|-------|-------------|
+| `requestId` | Unique request identifier |
+| `traceId` | OpenTelemetry trace ID |
+| `spanId` | OpenTelemetry span ID |
+| `userId` | Authenticated user ID |
+| `path` | HTTP request path |
+| `method` | HTTP method |
+
+### OpenTelemetry (OTEL)
+
+The backend supports OpenTelemetry for distributed tracing.
+
+#### Required Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | OTEL collector endpoint | `http://otel-collector:4318` |
+| `OTEL_SERVICE_NAME` | Service name in traces | `rewine-backend` |
+| `OTEL_TRACES_SAMPLER` | Sampling strategy | `parentbased_traceidratio` |
+| `OTEL_TRACES_SAMPLER_ARG` | Sampling ratio | `0.1` (10%) |
+
+#### Local Testing with Jaeger
+
+1. Start Jaeger:
+```bash
+docker run -d --name jaeger \
+  -p 16686:16686 \
+  -p 4318:4318 \
+  jaegertracing/all-in-one:1.53
+```
+
+2. Download OTEL agent:
+```bash
+wget -O /tmp/otel-agent.jar \
+  https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.1.0/opentelemetry-javaagent.jar
+```
+
+3. Run with agent:
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318 \
+OTEL_SERVICE_NAME=rewine-backend \
+OTEL_TRACES_SAMPLER=always_on \
+java -javaagent:/tmp/otel-agent.jar \
+  -jar target/rewine-backend-0.0.1-SNAPSHOT.jar
+```
+
+4. View traces: http://localhost:16686
+
+See [ENVIRONMENTS.md](../docs/ENVIRONMENTS.md#opentelemetry-otel-integration) for complete OTEL configuration.
+
+### Health Checks
+
+| Endpoint | Description |
+|----------|-------------|
+| `/api/v1/actuator/health` | Overall health status |
+| `/api/v1/actuator/health/liveness` | Liveness probe (is app running?) |
+| `/api/v1/actuator/health/readiness` | Readiness probe (can accept traffic?) |
+
+```bash
+# Check overall health
+curl http://localhost:8080/api/v1/actuator/health
+
+# Check liveness
+curl http://localhost:8080/api/v1/actuator/health/liveness
+
+# Check readiness
+curl http://localhost:8080/api/v1/actuator/health/readiness
+```
 
 ---
 

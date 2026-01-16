@@ -22,6 +22,7 @@ public class CustomUserDetails implements UserDetails {
     private final String email;
     private final String password;
     private final boolean enabled;
+    private final boolean accountNonLocked;
     private final Collection<? extends GrantedAuthority> authorities;
 
     public CustomUserDetails(UserEntity user) {
@@ -30,6 +31,7 @@ public class CustomUserDetails implements UserDetails {
         this.email = user.getEmail();
         this.password = user.getPasswordHash();
         this.enabled = user.isEnabled();
+        this.accountNonLocked = !user.isLocked();
         this.authorities = user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName()))
                 .collect(Collectors.toSet());
@@ -75,7 +77,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return accountNonLocked;
     }
 
     @Override
