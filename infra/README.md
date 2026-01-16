@@ -157,3 +157,46 @@ kubectl logs -f deployment/dev-rewine-backend -n rewine-dev
 kubectl describe pod <pod-name> -n rewine-dev
 ```
 
+## Observability
+
+### Prometheus Metrics
+
+The backend exposes Prometheus metrics at `/actuator/prometheus`. Kubernetes deployments include scraping annotations by default.
+
+**Annotations (in deployment.yaml):**
+```yaml
+annotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8080"
+  prometheus.io/path: "/actuator/prometheus"
+```
+
+### OpenTelemetry Support
+
+The platform supports distributed tracing via OpenTelemetry. To enable:
+
+1. **Set OTEL environment variables** in the configmap:
+   ```yaml
+   OTEL_ENABLED: "true"
+   OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4318"
+   OTEL_SERVICE_NAME: "rewine-backend"
+   ```
+
+2. **Apply the OTEL deployment patch** (optional, for auto-instrumentation):
+   Add to your overlay's kustomization.yaml:
+   ```yaml
+   patchesStrategicMerge:
+     - ../../base/otel-deployment-patch.yaml
+   ```
+
+See [ENVIRONMENTS.md](../docs/ENVIRONMENTS.md#opentelemetry-otel-integration) for complete configuration.
+
+---
+
+## Related Documentation
+
+- [Credentials & Accounts](../docs/CREDENTIALS_AND_ACCOUNTS.md) - Environment variables, API keys, test users
+- [Environments](../docs/ENVIRONMENTS.md) - Environment configuration details
+- [Backend README](../backend/README.md) - Backend configuration and setup
+- [Troubleshooting](../docs/TROUBLESHOOTING.md) - Common issues and solutions
+

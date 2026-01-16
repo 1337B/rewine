@@ -52,6 +52,21 @@ spec:
             - secretRef:
                 name: rewine-backend-secrets
 
+          # Additional Environment Variables
+          env:
+            # JAVA_TOOL_OPTIONS for OTEL agent (uncomment when using OTEL javaagent)
+            # The agent jar should be mounted at /opt/opentelemetry/opentelemetry-javaagent.jar
+            # - name: JAVA_TOOL_OPTIONS
+            #   value: "-javaagent:/opt/opentelemetry/opentelemetry-javaagent.jar"
+
+            # Alternative: Use OTEL_JAVAAGENT_ENABLED if agent is pre-packaged
+            - name: OTEL_JAVAAGENT_ENABLED
+              valueFrom:
+                configMapKeyRef:
+                  name: rewine-backend-config
+                  key: OTEL_ENABLED
+                  optional: true
+
           # Resource Limits
           resources:
             requests:

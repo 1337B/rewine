@@ -43,4 +43,10 @@ configMapGenerator:
     literals:
       - LOGGING_LEVEL_COM_REWINE=INFO
       - SPRING_JPA_SHOW_SQL=false
+      # OTEL UAT settings (higher sampling for testing)
+      - OTEL_ENABLED=false
+      - OTEL_SERVICE_NAME=rewine-backend
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=rewine,deployment.environment=uat
+      - OTEL_TRACES_SAMPLER=parentbased_traceidratio
+      - OTEL_TRACES_SAMPLER_ARG=0.5
 

@@ -574,6 +574,9 @@ public WineDto updateWine(@PathVariable Long id, @RequestBody WineDto dto) { ...
 ## Related Documentation
 
 - [Architecture](ARCHITECTURE.md) - System architecture
+- [Credentials & Accounts](./CREDENTIALS_AND_ACCOUNTS.md) - Environment variables, API keys, test users
 - [Environments](ENVIRONMENTS.md) - Environment configuration
+- [Backend Guide](../backend/README.md) - Backend configuration
 - [Frontend Guide](FRONTEND.md) - Frontend development
+- [Troubleshooting](./TROUBLESHOOTING.md) - Common issues and solutions
 

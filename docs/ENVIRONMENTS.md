@@ -13,6 +13,7 @@ This document describes the different environments used in the Rewine platform a
 5. [Local Development Setup](#local-development-setup)
 6. [Container Configuration](#container-configuration)
 7. [Kubernetes Configuration](#kubernetes-configuration)
+8. [OpenTelemetry (OTEL) Integration](#opentelemetry-otel-integration)
 
 ---
 
@@ -331,7 +332,10 @@ After starting the backend with the local profile, these users are available:
 |-------|----------|------|
 | `admin@rewine.local` | `Rewine123!` | ADMIN |
 | `partner@rewine.local` | `Rewine123!` | PARTNER |
+| `moderator@rewine.local` | `Rewine123!` | MODERATOR |
 | `user@rewine.local` | `Rewine123!` | USER |
+
+> ⚠️ **WARNING**: These credentials are for LOCAL DEVELOPMENT ONLY and are NOT present in production deployments.
 
 Test login:
 ```bash
@@ -563,6 +567,79 @@ spec:
 
 ---
 
+## OpenTelemetry (OTEL) Integration
+
+The Rewine platform supports distributed tracing and observability via OpenTelemetry.
+
+### Prometheus Metrics
+
+Prometheus metrics are exposed at `/actuator/prometheus` and can be scraped by Prometheus server.
+
+### Enabling OpenTelemetry Agent
+
+To enable OpenTelemetry Java agent for distributed tracing:
+
+1. **Download the OTEL agent:**
+   ```bash
+   curl -L -o opentelemetry-javaagent.jar \
+     https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+   ```
+
+2. **Set environment variables:**
+   ```bash
+   export OTEL_ENABLED=true
+   export OTEL_SERVICE_NAME=rewine-backend
+   export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+   export OTEL_TRACES_EXPORTER=otlp
+   export OTEL_METRICS_EXPORTER=prometheus
+   export OTEL_LOGS_EXPORTER=otlp
+   ```
+
+3. **Run with agent:**
+   ```bash
+   java -javaagent:opentelemetry-javaagent.jar \
+     -jar target/rewine-backend-0.0.1-SNAPSHOT.jar
+   ```
+
+### Kubernetes/OpenShift Configuration
+
+In Kubernetes deployments, add the following to your ConfigMap:
+
+```yaml
+OTEL_ENABLED: "true"
+OTEL_SERVICE_NAME: "rewine-backend"
+OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4318"
+OTEL_TRACES_EXPORTER: "otlp"
+OTEL_METRICS_EXPORTER: "prometheus"
+```
+
+And add to the Deployment spec:
+
+```yaml
+env:
+  - name: JAVA_TOOL_OPTIONS
+    value: "-javaagent:/opt/opentelemetry-javaagent.jar"
+```
+
+### Structured Logging
+
+Logs include `requestId` and (when OTEL is enabled) `traceId` and `spanId` fields for correlation.
+
+Example log output:
+```json
+{
+  "timestamp": "2026-01-15T12:00:00Z",
+  "level": "INFO",
+  "logger": "com.rewine.backend.service",
+  "message": "Wine retrieved successfully",
+  "requestId": "abc123",
+  "traceId": "def456",
+  "spanId": "ghi789"
+}
+```
+
+---
+
 ## Environment Checklist
 
 ### Before Deploying to UAT
@@ -585,8 +662,8 @@ spec:
 
 ## Related Documentation
 
-- [Frontend Guide](FRONTEND.md) - Development guide
-- [Credentials & Accounts](CREDENTIALS_AND_ACCOUNTS.md) - API keys and credentials setup
-- [Security](SECURITY.md) - Security configuration
-- [Troubleshooting](TROUBLESHOOTING.md) - Common issues
-
+- [Credentials & Accounts](./CREDENTIALS_AND_ACCOUNTS.md) - Environment variables, API keys, test users
+- [Security](./SECURITY.md) - Security architecture and practices
+- [Backend README](../backend/README.md) - Backend configuration and setup
+- [Infrastructure README](../infra/README.md) - Docker, Kubernetes, CI/CD configuration
+- [Troubleshooting](./TROUBLESHOOTING.md) - Common issues and solutions

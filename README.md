@@ -49,7 +49,7 @@ rewine/
 - **npm**: v10.x or higher (comes with Node.js)
 - **Java**: 21 (LTS) (for backend)
 - **Maven**: 3.9+ (for backend)
-- **Docker**: Required for PostgreSQL database
+n- **Docker**: Required for PostgreSQL database
 
 ### Local Development (Full Stack)
 
@@ -99,6 +99,7 @@ npm run dev
 |-------|----------|------|
 | admin@rewine.local | Rewine123! | ADMIN |
 | partner@rewine.local | Rewine123! | PARTNER |
+| moderator@rewine.local | Rewine123! | MODERATOR |
 | user@rewine.local | Rewine123! | USER |
 
 ### Frontend Development (Mock API - No Backend Required)
@@ -140,6 +141,35 @@ mvn spring-boot:run -Dspring-boot.run.profiles=local
 cd frontend
 npm run dev
 ```
+
+### Environment Variables Reference
+
+For a complete list of environment variables and external service credentials, see [Credentials & Accounts](docs/CREDENTIALS_AND_ACCOUNTS.md).
+
+**Common Backend Variables:**
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DB_HOST` | `localhost` | PostgreSQL host |
+| `DB_PASSWORD` | `rewine_secret` | Database password |
+| `JWT_SECRET` | (dev default) | JWT signing secret |
+| `AI_PROVIDER` | `mock` | AI provider (`mock` or `openai`) |
+| `OPENAI_API_KEY` | - | OpenAI API key (optional) |
+| `GOOGLE_MAPS_API_KEY` | - | Google Maps key (optional) |
+
+**Common Frontend Variables:**
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `VITE_API_BASE_URL` | `http://localhost:8080/api/v1` | Backend API URL |
+| `VITE_MOCK_API` | `false` | Enable MSW mocking |
+
+### Common Issues
+
+Having trouble? Check the [Troubleshooting Guide](docs/TROUBLESHOOTING.md) for solutions to common issues:
+
+- **Database connection errors** → Verify PostgreSQL is running
+- **Port already in use** → Kill existing process or use different port
+- **CORS errors** → Check backend CORS configuration
+- **Auth not working** → Verify JWT_SECRET matches and tokens are valid
 
 ---
 
@@ -244,9 +274,11 @@ java -jar target/rewine-backend-0.0.1-SNAPSHOT.jar
 | [Backend Guide](backend/README.md) | API endpoints, commands, configuration |
 | [Backend Architecture](backend/ARCHITECTURE.md) | Backend layers, security, database design |
 | [Security](docs/SECURITY.md) | Authentication, JWT tokens, CORS, headers |
+| [Credentials & Accounts](docs/CREDENTIALS_AND_ACCOUNTS.md) | Environment variables, API keys, test users |
 | [Development Workflow](docs/DEVELOPMENT_WORKFLOW.md) | Branching, commits, PRs, releases |
 | [Environments](docs/ENVIRONMENTS.md) | Dev/UAT/Prod configuration |
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | Common issues and solutions |
+| [Infrastructure](infra/README.md) | Docker, Kubernetes, CI/CD configuration |
 
 ---
 
