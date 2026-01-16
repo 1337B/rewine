@@ -44,4 +44,10 @@ configMapGenerator:
       - LOGGING_LEVEL_ROOT=WARN
       - LOGGING_LEVEL_COM_REWINE=WARN
       - SPRING_JPA_SHOW_SQL=false
+      # OTEL Production settings (enable when collector is ready)
+      - OTEL_ENABLED=false
+      - OTEL_SERVICE_NAME=rewine-backend
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=rewine,deployment.environment=prod
+      - OTEL_TRACES_SAMPLER=parentbased_traceidratio
+      - OTEL_TRACES_SAMPLER_ARG=0.1
 

@@ -833,6 +833,8 @@ If you've tried the above solutions and still have issues:
 
 - [Frontend Guide](FRONTEND.md) - Frontend development guide
 - [Backend Guide](../backend/README.md) - Backend development guide
+- [Credentials & Accounts](./CREDENTIALS_AND_ACCOUNTS.md) - Environment variables, API keys, test users
 - [Environments](ENVIRONMENTS.md) - Environment configuration
 - [Architecture](ARCHITECTURE.md) - System architecture
+- [Infrastructure](../infra/README.md) - Docker, Kubernetes, CI/CD configuration
 

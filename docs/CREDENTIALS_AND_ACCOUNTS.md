@@ -243,4 +243,6 @@ curl -X POST "http://localhost:8080/api/v1/auth/login" \
 - [ENVIRONMENTS.md](./ENVIRONMENTS.md) - Environment configuration details
 - [SECURITY.md](./SECURITY.md) - Security architecture and practices
 - [Backend README](../backend/README.md) - Backend configuration and setup
+- [Infrastructure README](../infra/README.md) - Docker, Kubernetes, CI/CD configuration
+- [Troubleshooting](./TROUBLESHOOTING.md) - Common issues and solutions
 

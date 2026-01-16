@@ -435,6 +435,9 @@ sequenceDiagram
 ## Related Documentation
 
 - [Frontend Guide](FRONTEND.md) - Detailed frontend development guide
+- [Backend Architecture](../backend/ARCHITECTURE.md) - Backend architecture details
 - [Security](SECURITY.md) - Security implementation details
+- [Credentials & Accounts](./CREDENTIALS_AND_ACCOUNTS.md) - Environment variables, API keys, test users
 - [Environments](ENVIRONMENTS.md) - Environment configuration
+- [Troubleshooting](./TROUBLESHOOTING.md) - Common issues and solutions
 

@@ -466,6 +466,8 @@ git commit -m "test(wines): add mapper unit tests"
 ## Related Documentation
 
 - [Frontend Guide](FRONTEND.md) - Frontend development guide
+- [Backend Guide](../backend/README.md) - Backend development guide
 - [Architecture](ARCHITECTURE.md) - System architecture
+- [Environments](ENVIRONMENTS.md) - Environment configuration
 - [Troubleshooting](TROUBLESHOOTING.md) - Common issues
 

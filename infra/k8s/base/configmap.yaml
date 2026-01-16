@@ -29,7 +29,35 @@ data:
   LOGGING_LEVEL_ROOT: "WARN"
   LOGGING_LEVEL_COM_REWINE: "INFO"
 
-  # Actuator
+  # Actuator / Prometheus
   MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics,prometheus"
   MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "when_authorized"
+  MANAGEMENT_ENDPOINT_PROMETHEUS_ENABLED: "true"
+  MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED: "true"
+
+  # =============================================================================
+  # OpenTelemetry Configuration (OTEL)
+  # =============================================================================
+  # Enable/disable OTEL (set to "true" when agent is attached)
+  OTEL_ENABLED: "false"
+
+  # OTEL Exporter Configuration - Configure based on your collector
+  # Example: "http://otel-collector:4318/v1/traces"
+  OTEL_EXPORTER_OTLP_ENDPOINT: ""
+
+  # OTEL Service Name (override if needed)
+  OTEL_SERVICE_NAME: "rewine-backend"
+
+  # OTEL Resource Attributes
+  OTEL_RESOURCE_ATTRIBUTES: "service.namespace=rewine,deployment.environment=prod"
+
+  # OTEL Traces Sampler (always_on, always_off, traceidratio, parentbased_always_on, etc.)
+  OTEL_TRACES_SAMPLER: "parentbased_traceidratio"
+  OTEL_TRACES_SAMPLER_ARG: "0.1"
+
+  # OTEL Metrics Export Interval (ms)
+  OTEL_METRIC_EXPORT_INTERVAL: "60000"
+
+  # OTEL Logs Export (true/false)
+  OTEL_LOGS_EXPORTER: "none"
 

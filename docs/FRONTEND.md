@@ -559,6 +559,9 @@ Focus areas:
 ## Related Documentation
 
 - [Architecture](ARCHITECTURE.md) - System architecture
+- [Backend Guide](../backend/README.md) - Backend configuration
+- [Credentials & Accounts](./CREDENTIALS_AND_ACCOUNTS.md) - Environment variables, API keys, test users
+- [Environments](ENVIRONMENTS.md) - Environment configuration
 - [Security](SECURITY.md) - Security implementation
 - [Troubleshooting](TROUBLESHOOTING.md) - Common issues
 
