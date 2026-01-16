@@ -205,6 +205,203 @@ console.log(env.apiBaseUrl)
 
 ## Local Development Setup
 
+### Quick Start (Full Stack)
+
+This section provides step-by-step commands to get the entire Rewine stack running locally.
+
+#### Prerequisites
+
+- **Docker Desktop** (for PostgreSQL or full docker-compose)
+- **Java 21** (for backend)
+- **Maven 3.9+** (for backend)
+- **Node.js 20+** (for frontend)
+
+---
+
+### Option 1: Docker Compose (Recommended)
+
+Start everything with a single command:
+
+```bash
+# From repository root
+cd infra
+
+# Start PostgreSQL and Backend
+docker-compose up -d
+
+# Check status
+docker-compose ps
+
+# View logs
+docker-compose logs -f backend
+```
+
+Services available:
+- **PostgreSQL**: `localhost:5432` (user: rewine, pass: rewine_secret, db: rewine)
+- **Backend API**: `http://localhost:8080/api/v1`
+
+Then start the frontend:
+
+```bash
+# From repository root
+cd frontend
+
+# Copy environment file
+cp .env.example .env.local
+
+# Install dependencies (first time only)
+npm install
+
+# Start development server
+npm run dev
+```
+
+Frontend available at: `http://localhost:5173`
+
+---
+
+### Option 2: Manual Setup (More Control)
+
+#### Step 1: Start PostgreSQL
+
+Using Docker:
+```bash
+docker run -d --name rewine-postgres \
+  -e POSTGRES_DB=rewine \
+  -e POSTGRES_USER=rewine \
+  -e POSTGRES_PASSWORD=rewine_secret \
+  -p 5432:5432 \
+  postgres:15
+```
+
+Or use docker-compose for just PostgreSQL:
+```bash
+cd infra
+docker-compose up -d postgres
+```
+
+#### Step 2: Start Backend
+
+```bash
+cd backend
+
+# Run with local profile (PostgreSQL)
+mvn spring-boot:run -Dspring-boot.run.profiles=local
+
+# Or with explicit environment variables
+DB_HOST=localhost DB_PORT=5432 DB_NAME=rewine DB_USER=rewine DB_PASSWORD=rewine_secret \
+  mvn spring-boot:run -Dspring-boot.run.profiles=local
+```
+
+Backend available at: `http://localhost:8080/api/v1`
+
+Verify it's running:
+```bash
+curl http://localhost:8080/api/v1/actuator/health
+```
+
+#### Step 3: Start Frontend
+
+```bash
+cd frontend
+
+# Copy environment file
+cp .env.example .env.local
+
+# Ensure .env.local has:
+# VITE_API_BASE_URL=http://localhost:8080/api/v1
+# VITE_MOCK_API=false
+
+# Install dependencies (first time only)
+npm install
+
+# Start development server
+npm run dev
+```
+
+Frontend available at: `http://localhost:5173`
+
+---
+
+### Seeded Test Users (Local Only)
+
+After starting the backend with the local profile, these users are available:
+
+| Email | Password | Role |
+|-------|----------|------|
+| `admin@rewine.local` | `Rewine123!` | ADMIN |
+| `partner@rewine.local` | `Rewine123!` | PARTNER |
+| `user@rewine.local` | `Rewine123!` | USER |
+
+Test login:
+```bash
+curl -X POST "http://localhost:8080/api/v1/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"usernameOrEmail": "admin@rewine.local", "password": "Rewine123!"}'
+```
+
+---
+
+### Ports Reference
+
+| Service | Port | URL |
+|---------|------|-----|
+| Frontend (Vite dev) | 5173 | http://localhost:5173 |
+| Backend API | 8080 | http://localhost:8080/api/v1 |
+| PostgreSQL | 5432 | localhost:5432 |
+| H2 Console (test profile only) | 8080 | http://localhost:8080/api/v1/h2-console |
+
+---
+
+### CORS Configuration
+
+The backend local profile allows these origins:
+- `http://localhost:5173` (Vite default)
+- `http://localhost:3000` (alternative)
+- `http://localhost:4173` (Vite preview)
+- `http://127.0.0.1:5173`
+- `http://127.0.0.1:3000`
+- `http://127.0.0.1:4173`
+
+---
+
+### Troubleshooting Local Setup
+
+#### Backend won't start
+```bash
+# Check PostgreSQL is running
+docker ps | grep postgres
+
+# Check database connection
+psql -h localhost -U rewine -d rewine
+
+# Check backend logs
+mvn spring-boot:run -Dspring-boot.run.profiles=local -X
+```
+
+#### Frontend can't connect to backend
+1. Verify backend is running: `curl http://localhost:8080/api/v1/actuator/health`
+2. Check `.env.local` has `VITE_API_BASE_URL=http://localhost:8080/api/v1`
+3. Ensure `VITE_MOCK_API=false`
+4. Check browser console for CORS errors
+
+#### Database connection refused
+```bash
+# Start PostgreSQL if not running
+docker start rewine-postgres
+
+# Or recreate
+docker rm -f rewine-postgres
+docker run -d --name rewine-postgres \
+  -e POSTGRES_DB=rewine \
+  -e POSTGRES_USER=rewine \
+  -e POSTGRES_PASSWORD=rewine_secret \
+  -p 5432:5432 \
+  postgres:15
+```
+
+---
+
 ### Step 1: Create Local Environment File
 
 ```bash
@@ -389,6 +586,7 @@ spec:
 ## Related Documentation
 
 - [Frontend Guide](FRONTEND.md) - Development guide
+- [Credentials & Accounts](CREDENTIALS_AND_ACCOUNTS.md) - API keys and credentials setup
 - [Security](SECURITY.md) - Security configuration
 - [Troubleshooting](TROUBLESHOOTING.md) - Common issues
 

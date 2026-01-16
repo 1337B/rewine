@@ -3,11 +3,29 @@
 # =============================================================================
 # Local development environment with PostgreSQL and Backend services
 #
-# Usage:
+# QUICK START:
 #   docker-compose up -d          # Start all services
 #   docker-compose down           # Stop all services
 #   docker-compose logs -f        # View logs
 #   docker-compose down -v        # Stop and remove volumes
+#
+# EXPOSED PORTS:
+#   - PostgreSQL: localhost:5432 (user: rewine, pass: rewine_secret, db: rewine)
+#   - Backend API: http://localhost:8080/api/v1
+#
+# FRONTEND SETUP:
+#   The frontend runs separately. After starting this compose:
+#   1. cd ../frontend
+#   2. cp .env.example .env.local
+#   3. Ensure .env.local has: VITE_API_BASE_URL=http://localhost:8080/api/v1
+#   4. npm install && npm run dev
+#   5. Open http://localhost:5173
+#
+# TEST USERS (after backend starts):
+#   - admin@rewine.local / Rewine123! (ADMIN)
+#   - partner@rewine.local / Rewine123! (PARTNER)
+#   - user@rewine.local / Rewine123! (USER)
+# =============================================================================
 
 version: '3.8'
 
@@ -69,6 +87,17 @@ services:
       # Flyway
       SPRING_FLYWAY_ENABLED: "true"
       SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+
+      # AI Configuration (Optional - for AI-powered features)
+      # Provider: 'mock' for development, 'openai' for real AI
+      AI_PROVIDER: ${AI_PROVIDER:-mock}
+      AI_ENABLED: ${AI_ENABLED:-true}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+
+      # Google Maps Configuration (Optional - for route maps)
+      GOOGLE_MAPS_ENABLED: ${GOOGLE_MAPS_ENABLED:-true}
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
 
       # JVM Options
       JAVA_OPTS: >-

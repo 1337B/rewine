@@ -1,5 +1,6 @@
 package com.rewine.backend.client;
 
+import com.rewine.backend.configuration.properties.AiProperties;
 import com.rewine.backend.model.entity.WineEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,12 @@ import java.util.Objects;
 public class MockAiClient implements IAiClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockAiClient.class);
+
+    private final AiProperties aiProperties;
+
+    public MockAiClient(AiProperties aiProperties) {
+        this.aiProperties = aiProperties;
+    }
 
     @Override
     public Map<String, Object> generateWineProfile(WineEntity wine, String language) {
@@ -65,7 +72,7 @@ public class MockAiClient implements IAiClient {
 
     @Override
     public boolean isAvailable() {
-        return true;
+        return aiProperties.isEnabled();
     }
 
     @Override

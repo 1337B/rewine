@@ -5,6 +5,7 @@ import com.rewine.backend.dto.common.ApiErrorResponse;
 import com.rewine.backend.dto.common.FieldValidationError;
 import com.rewine.backend.exception.ErrorCode;
 import com.rewine.backend.exception.RewineException;
+import com.rewine.backend.exception.ServiceUnavailableException;
 import com.rewine.backend.utils.logging.IRequestLoggingFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -262,6 +263,24 @@ public class GlobalExceptionHandlerImpl implements IGlobalExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    /**
+     * Handles service unavailable exceptions (AI, Maps, etc.).
+     * Returns 501 Not Implemented with details about which service is unavailable.
+     */
+    @ExceptionHandler(ServiceUnavailableException.class)
+    public ResponseEntity<ApiErrorResponse> handleServiceUnavailableException(ServiceUnavailableException ex) {
+        LOGGER.warn("Service unavailable: {} - {}", ex.getServiceName(), ex.getMessage());
+
+        ApiErrorResponse response = buildErrorResponse(
+                HttpStatus.NOT_IMPLEMENTED,
+                ex.getCode(),
+                ex.getMessage(),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(response);
     }
 
     @Override
