@@ -53,6 +53,8 @@ management:
       enabled: true
     metrics:
       enabled: true
+    prometheus:
+      enabled: true
     env:
       enabled: true
     loggers:
@@ -64,6 +66,11 @@ management:
       enabled: true
     db:
       enabled: true
+  # Prometheus metrics export
+  prometheus:
+    metrics:
+      export:
+        enabled: true
 
 # Application Info
 info:
