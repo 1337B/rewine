@@ -3,6 +3,7 @@
  *
  * Functions to map between DTOs (API layer) and domain models.
  * All mappers include null checks and default values for safety.
+ * Note: Backend uses camelCase for all JSON fields.
  */
 
 import type {
@@ -14,7 +15,6 @@ import type {
   WineComparison,
   ComparisonAttribute,
   AiWineProfile,
-  AiFoodPairing,
   WineScanResult,
 } from './wine.types'
 import type {
@@ -27,7 +27,6 @@ import type {
   CompareResultDto,
   ComparisonAttributeDto,
   AiProfileDto,
-  AiFoodPairingDto,
   WineScanResultDto,
 } from '@api/dto/wines.dto'
 
@@ -42,23 +41,23 @@ export function mapWineFromDto(dto: WineDto | WineDetailsDto): Wine {
   return {
     id: dto.id,
     name: dto.name,
-    winery: dto.winery,
-    type: dto.type,
-    region: dto.region,
-    country: dto.country,
-    grapeVarieties: dto.grape_varieties ?? [],
+    winery: dto.winery?.name ?? '',
+    type: dto.wineType,
+    region: dto.winery?.region ?? '',
+    country: dto.winery?.country ?? '',
+    grapeVarieties: dto.grapes ?? [],
     vintage: dto.vintage ?? null,
-    alcoholContent: dto.alcohol_content ?? null,
-    price: dto.price ?? null,
-    rating: dto.rating ?? null,
-    reviewCount: dto.review_count ?? 0,
-    description: dto.description ?? '',
-    imageUrl: dto.image_url ?? null,
-    tastingNotes: dto.tasting_notes ? mapTastingNotesFromDto(dto.tasting_notes) : null,
-    foodPairings: dto.food_pairings ?? [],
-    awards: (dto as WineDetailsDto).awards?.map(mapWineAwardFromDto) ?? [],
-    createdAt: new Date(dto.created_at),
-    updatedAt: new Date(dto.updated_at),
+    alcoholContent: dto.alcoholContent ?? null,
+    price: dto.priceMin ?? null,
+    rating: dto.ratingAverage ? Number(dto.ratingAverage) : null,
+    reviewCount: dto.ratingCount ?? 0,
+    description: dto.descriptionEs ?? dto.descriptionEn ?? '',
+    imageUrl: dto.imageUrl ?? null,
+    tastingNotes: null, // Not in current backend response
+    foodPairings: [],
+    awards: [],
+    createdAt: dto.createdAt ? new Date(dto.createdAt) : new Date(),
+    updatedAt: dto.createdAt ? new Date(dto.createdAt) : new Date(),
   }
 }
 
@@ -69,15 +68,15 @@ export function mapWineSummaryFromDto(dto: WineSummaryDto): WineSummary {
   return {
     id: dto.id,
     name: dto.name,
-    winery: dto.winery,
-    type: dto.type,
-    region: dto.region,
-    country: dto.country,
+    winery: dto.wineryName ?? '',
+    type: dto.wineType,
+    region: dto.region ?? '',
+    country: dto.country ?? '',
     vintage: dto.vintage ?? null,
-    price: dto.price ?? null,
-    rating: dto.rating ?? null,
-    reviewCount: dto.review_count ?? 0,
-    imageUrl: dto.image_url ?? null,
+    price: dto.priceMin ? Number(dto.priceMin) : null,
+    rating: dto.ratingAverage ? Number(dto.ratingAverage) : null,
+    reviewCount: dto.ratingCount ?? 0,
+    imageUrl: dto.imageUrl ?? null,
   }
 }
 
@@ -118,14 +117,14 @@ export function mapWineAwardFromDto(dto: WineAwardDto): WineAward {
 export function mapWineReviewFromDto(dto: WineReviewDto): WineReview {
   return {
     id: dto.id,
-    wineId: dto.wine_id,
-    userId: dto.user_id,
-    userName: dto.user_name,
-    userAvatar: dto.user_avatar ?? null,
+    wineId: dto.wineId,
+    userId: dto.userId,
+    userName: dto.username,
+    userAvatar: dto.userAvatarUrl ?? null,
     rating: dto.rating,
-    comment: dto.comment,
-    helpfulCount: dto.helpful_count ?? 0,
-    createdAt: new Date(dto.created_at),
+    comment: dto.comment ?? '',
+    helpfulCount: dto.helpfulCount ?? 0,
+    createdAt: new Date(dto.createdAt),
   }
 }
 
@@ -138,9 +137,9 @@ export function mapWineReviewFromDto(dto: WineReviewDto): WineReview {
  */
 export function mapWineComparisonFromDto(dto: CompareResultDto): WineComparison {
   return {
-    wines: dto.wines.map(mapWineFromDto),
-    attributes: dto.comparison.map(mapComparisonAttributeFromDto),
-    aiSummary: dto.ai_summary ?? null,
+    wines: [], // Would need to fetch wine details separately
+    attributes: [],
+    aiSummary: dto.comparisonContent?.summary ?? null,
   }
 }
 
@@ -164,25 +163,18 @@ export function mapComparisonAttributeFromDto(dto: ComparisonAttributeDto): Comp
  */
 export function mapAiProfileFromDto(dto: AiProfileDto): AiWineProfile {
   return {
-    wineId: dto.wine_id,
-    summary: dto.summary,
-    idealOccasions: dto.ideal_occasions ?? [],
-    foodPairingsDetailed: dto.food_pairings_detailed?.map(mapAiFoodPairingFromDto) ?? [],
-    similarWines: dto.similar_wines ?? [],
-    personalityTraits: dto.personality_traits ?? [],
-    generatedAt: new Date(dto.generated_at),
-  }
-}
-
-/**
- * Map AI food pairing DTO to domain model
- */
-export function mapAiFoodPairingFromDto(dto: AiFoodPairingDto): AiFoodPairing {
-  return {
-    dish: dto.dish,
-    category: dto.category,
-    matchScore: dto.match_score,
-    reason: dto.reason,
+    wineId: dto.wineId,
+    summary: dto.profileContent?.summary ?? '',
+    idealOccasions: dto.profileContent?.idealOccasions ?? [],
+    foodPairingsDetailed: dto.profileContent?.foodPairings?.map(dish => ({
+      dish,
+      category: 'General',
+      matchScore: 0.8,
+      reason: '',
+    })) ?? [],
+    similarWines: dto.profileContent?.similarWines ?? [],
+    personalityTraits: [],
+    generatedAt: new Date(dto.generatedAt),
   }
 }
 
@@ -208,19 +200,15 @@ export function mapWineScanResultFromDto(dto: WineScanResultDto): WineScanResult
 /**
  * Map Wine domain model to DTO for API requests
  */
-export function mapWineToDto(wine: Partial<Wine>): Partial<WineDto> {
+export function mapWineToDto(wine: Partial<Wine>): Record<string, unknown> {
   return {
     name: wine.name,
-    winery: wine.winery,
-    type: wine.type,
-    region: wine.region,
-    country: wine.country,
-    grape_varieties: wine.grapeVarieties,
+    wineType: wine.type,
+    grapes: wine.grapeVarieties,
     vintage: wine.vintage ?? undefined,
-    alcohol_content: wine.alcoholContent ?? undefined,
-    price: wine.price ?? undefined,
-    description: wine.description,
-    image_url: wine.imageUrl ?? undefined,
-    food_pairings: wine.foodPairings,
+    alcoholContent: wine.alcoholContent ?? undefined,
+    priceMin: wine.price ?? undefined,
+    descriptionEs: wine.description,
+    imageUrl: wine.imageUrl ?? undefined,
   }
 }

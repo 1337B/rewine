@@ -3,6 +3,7 @@
  *
  * Data Transfer Objects for authentication API endpoints.
  * These represent the exact shape of data sent to/from the backend.
+ * Note: Backend uses camelCase for all JSON fields.
  */
 
 import type { UserRole } from '@domain/user/user.types'
@@ -13,9 +14,10 @@ import type { UserRole } from '@domain/user/user.types'
 
 /**
  * Login request payload
+ * Backend accepts username OR email in usernameOrEmail field
  */
 export interface LoginRequestDto {
-  email: string
+  usernameOrEmail: string
   password: string
 }
 
@@ -23,16 +25,17 @@ export interface LoginRequestDto {
  * Registration request payload
  */
 export interface RegisterRequestDto {
+  username: string
   email: string
   password: string
-  name: string
+  name?: string
 }
 
 /**
  * Token refresh request payload
  */
 export interface RefreshTokenRequestDto {
-  refresh_token: string
+  refreshToken: string
 }
 
 /**
@@ -47,7 +50,7 @@ export interface ForgotPasswordRequestDto {
  */
 export interface ResetPasswordRequestDto {
   token: string
-  new_password: string
+  newPassword: string
 }
 
 /**
@@ -63,41 +66,43 @@ export interface VerifyEmailRequestDto {
 
 /**
  * Authentication response (login/register)
+ * Backend returns camelCase fields
  */
 export interface AuthResponseDto {
-  access_token: string
-  refresh_token: string
-  expires_in: number
-  token_type: 'Bearer'
+  accessToken: string
+  refreshToken: string
+  expiresIn: number
+  tokenType: 'Bearer'
   user: AuthUserDto
 }
 
 /**
- * Authenticated user data
+ * Authenticated user data from backend
  */
 export interface AuthUserDto {
   id: string
+  username: string
   email: string
-  name: string
-  avatar?: string | null
-  roles: UserRole[]
-  is_verified: boolean
+  name: string | null
+  avatarUrl?: string | null
+  roles: string[]
+  emailVerified: boolean
 }
 
 /**
  * Token refresh response
  */
 export interface RefreshTokenResponseDto {
-  access_token: string
-  expires_in: number
+  accessToken: string
+  expiresIn: number
 }
 
 /**
  * Current user response (GET /auth/me)
  */
 export interface MeResponseDto extends AuthUserDto {
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
 }
 
 /**

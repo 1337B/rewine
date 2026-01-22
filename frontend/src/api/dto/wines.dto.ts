@@ -3,6 +3,7 @@
  *
  * Data Transfer Objects for wine API endpoints.
  * These represent the exact shape of data sent to/from the backend.
+ * Note: Backend uses camelCase for all JSON fields.
  */
 
 import type { WineType } from '@domain/wine/wine.types'
@@ -12,34 +13,97 @@ import type { WineType } from '@domain/wine/wine.types'
 // ============================================================================
 
 /**
- * Wine summary for list views
+ * Wine summary for list views (matches backend WineSummaryResponse)
  */
 export interface WineSummaryDto {
   id: string
   name: string
-  winery: string
-  type: WineType
-  region: string
-  country: string
   vintage?: number | null
-  price?: number | null
-  rating?: number | null
-  review_count?: number
-  image_url?: string | null
+  wineType: WineType
+  style?: string | null
+  wineryName?: string | null
+  region?: string | null
+  country?: string | null
+  priceMin?: number | null
+  priceMax?: number | null
+  ratingAverage?: number | null
+  ratingCount?: number
+  imageUrl?: string | null
+  isFeatured?: boolean
 }
 
 /**
- * Full wine details
+ * Full wine details (matches backend WineDetailsResponse)
  */
-export interface WineDetailsDto extends WineSummaryDto {
-  grape_varieties?: string[]
-  alcohol_content?: number | null
-  description?: string | null
-  tasting_notes?: TastingNotesDto | null
-  food_pairings?: string[]
-  awards?: WineAwardDto[]
-  created_at: string
-  updated_at: string
+export interface WineDetailsDto {
+  id: string
+  name: string
+  vintage?: number | null
+  wineType: WineType
+  style?: string | null
+  grapes?: string[]
+  allergens?: string[]
+  descriptionEs?: string | null
+  descriptionEn?: string | null
+  alcoholContent?: number | null
+  servingTempMin?: number | null
+  servingTempMax?: number | null
+  priceMin?: number | null
+  priceMax?: number | null
+  imageUrl?: string | null
+  ratingAverage?: number | null
+  ratingCount?: number
+  isFeatured?: boolean
+  createdAt?: string
+
+  // Winery information
+  winery?: WineryInfoDto | null
+
+  // Rating distribution
+  ratingDistribution?: RatingDistributionDto | null
+
+  // Featured reviews preview
+  featuredReviews?: WineReviewDto[]
+
+  // User-specific data
+  userWineData?: UserWineDataDto | null
+
+  // AI profile status
+  aiProfileStatus?: 'NOT_REQUESTED' | 'GENERATED' | null
+  aiProfileGeneratedAt?: string | null
+}
+
+/**
+ * Winery info embedded in wine details
+ */
+export interface WineryInfoDto {
+  id: string
+  name: string
+  region?: string | null
+  country?: string | null
+  logoUrl?: string | null
+  websiteUrl?: string | null
+}
+
+/**
+ * Rating distribution for star ratings
+ */
+export interface RatingDistributionDto {
+  oneStar: number
+  twoStar: number
+  threeStar: number
+  fourStar: number
+  fiveStar: number
+}
+
+/**
+ * User-specific wine data
+ */
+export interface UserWineDataDto {
+  hasReviewed?: boolean
+  userRating?: number | null
+  inCellar?: boolean
+  cellarQuantity?: number | null
 }
 
 /**
@@ -76,19 +140,21 @@ export interface WineAwardDto {
 // ============================================================================
 
 /**
- * Wine review
+ * Wine review (matches backend ReviewResponse)
  */
 export interface WineReviewDto {
   id: string
-  wine_id: string
-  user_id: string
-  user_name: string
-  user_avatar?: string | null
+  wineId: string
+  userId: string
+  username: string
+  userAvatarUrl?: string | null
   rating: number
-  comment: string
-  helpful_count?: number
-  created_at: string
-  updated_at?: string
+  title?: string | null
+  comment?: string | null
+  helpfulCount?: number
+  isVerified?: boolean
+  createdAt: string
+  updatedAt?: string
 }
 
 /**
@@ -96,6 +162,7 @@ export interface WineReviewDto {
  */
 export interface CreateWineReviewRequestDto {
   rating: number
+  title?: string
   comment?: string
 }
 
@@ -104,20 +171,33 @@ export interface CreateWineReviewRequestDto {
 // ============================================================================
 
 /**
- * Wine comparison result
+ * Wine comparison result (matches backend WineComparisonResponse)
  */
 export interface CompareResultDto {
-  wines: WineDetailsDto[]
-  comparison: ComparisonAttributeDto[]
-  ai_summary?: string
+  wineAId: string
+  wineBId: string
+  language: string
+  comparisonContent: ComparisonContentDto
+  cached: boolean
+  generatedAt: string
 }
 
 /**
- * Comparison attribute
+ * Comparison content from AI
+ */
+export interface ComparisonContentDto {
+  similarities?: string[]
+  differences?: string[]
+  recommendation?: string
+  summary?: string
+}
+
+/**
+ * Comparison attribute structure
  */
 export interface ComparisonAttributeDto {
   attribute: string
-  values: (string | number | null)[]
+  values: string[]
   winner_index?: number | null
 }
 
@@ -126,26 +206,25 @@ export interface ComparisonAttributeDto {
 // ============================================================================
 
 /**
- * AI-generated wine profile
+ * AI-generated wine profile (matches backend WineAiProfileResponse)
  */
 export interface AiProfileDto {
-  wine_id: string
-  summary: string
-  ideal_occasions: string[]
-  food_pairings_detailed: AiFoodPairingDto[]
-  similar_wines: string[]
-  personality_traits: string[]
-  generated_at: string
+  wineId: string
+  language: string
+  profileContent: AiProfileContentDto
+  cached: boolean
+  generatedAt: string
 }
 
 /**
- * AI food pairing suggestion
+ * AI profile content
  */
-export interface AiFoodPairingDto {
-  dish: string
-  category: string
-  match_score: number
-  reason: string
+export interface AiProfileContentDto {
+  summary?: string
+  tastingNotes?: string
+  foodPairings?: string[]
+  idealOccasions?: string[]
+  similarWines?: string[]
 }
 
 // ============================================================================
@@ -153,21 +232,24 @@ export interface AiFoodPairingDto {
 // ============================================================================
 
 /**
- * Create wine request
+ * Create wine request (matches backend format)
  */
 export interface CreateWineRequestDto {
   name: string
-  winery: string
-  type: WineType
-  region: string
-  country: string
-  grape_varieties?: string[]
+  wineryId?: string
+  wineType: WineType
   vintage?: number
-  alcohol_content?: number
-  price?: number
-  description?: string
-  image_url?: string
-  food_pairings?: string[]
+  style?: string
+  grapes?: string[]
+  allergens?: string[]
+  descriptionEs?: string
+  descriptionEn?: string
+  alcoholContent?: number
+  servingTempMin?: number
+  servingTempMax?: number
+  priceMin?: number
+  priceMax?: number
+  imageUrl?: string
 }
 
 /**
@@ -176,26 +258,22 @@ export interface CreateWineRequestDto {
 export interface UpdateWineRequestDto extends Partial<CreateWineRequestDto> {}
 
 /**
- * Wine filter/search parameters
+ * Wine filter/search parameters (matches backend WineSearchRequest)
  */
 export interface WineFilterParamsDto {
   search?: string
-  type?: string | string[]
-  region?: string | string[]
-  country?: string | string[]
-  grape_variety?: string | string[]
-  winery?: string | string[]
-  min_price?: number
-  max_price?: number
-  min_rating?: number
-  max_rating?: number
-  vintage?: number | number[]
-  min_vintage?: number
-  max_vintage?: number
-  sort_by?: 'name' | 'price' | 'rating' | 'vintage' | 'created_at'
-  sort_order?: 'asc' | 'desc'
+  wineType?: WineType
+  country?: string
+  region?: string
+  vintage?: number
+  minPrice?: number
+  maxPrice?: number
+  minRating?: number
+  featured?: boolean
+  sortBy?: 'name' | 'vintage' | 'priceMin' | 'priceMax' | 'ratingAverage'
+  sortDirection?: 'ASC' | 'DESC'
   page?: number
-  page_size?: number
+  size?: number
 }
 
 // ============================================================================
@@ -203,18 +281,35 @@ export interface WineFilterParamsDto {
 // ============================================================================
 
 /**
- * Paginated wines response
+ * Paginated wines response (matches backend PageResponse)
  */
 export interface WinesPageResponseDto {
-  data: WineSummaryDto[]
-  pagination: {
-    page: number
-    page_size: number
-    total_items: number
-    total_pages: number
-    has_next: boolean
-    has_previous: boolean
-  }
+  items: WineSummaryDto[]
+  content: WineSummaryDto[]  // Legacy alias
+  pageNumber: number
+  pageSize: number
+  totalItems: number
+  totalPages: number
+  first: boolean
+  last: boolean
+  hasNext: boolean
+  hasPrevious: boolean
+}
+
+/**
+ * Paginated reviews response (matches backend PageResponse)
+ */
+export interface ReviewsPageResponseDto {
+  items: WineReviewDto[]
+  content: WineReviewDto[]  // Legacy alias
+  pageNumber: number
+  pageSize: number
+  totalItems: number
+  totalPages: number
+  first: boolean
+  last: boolean
+  hasNext: boolean
+  hasPrevious: boolean
 }
 
 /**

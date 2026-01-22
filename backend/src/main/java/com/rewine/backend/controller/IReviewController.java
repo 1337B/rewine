@@ -12,7 +12,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.UUID;
 
@@ -41,9 +44,9 @@ public interface IReviewController {
     })
     ResponseEntity<PageResponse<ReviewResponse>> getWineReviews(
             @Parameter(description = "Wine ID", required = true) UUID wineId,
-            @Parameter(description = "Filter type") ReviewFilter filter,
-            @Parameter(description = "Page number") int page,
-            @Parameter(description = "Page size") int size
+            @Parameter(description = "Filter type") @RequestParam(required = false) ReviewFilter filter,
+            @Parameter(description = "Page number") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size
     );
 
     /**
@@ -71,7 +74,7 @@ public interface IReviewController {
     })
     ResponseEntity<ReviewResponse> createReview(
             @Parameter(description = "Wine ID", required = true) UUID wineId,
-            CreateReviewRequest request
+            @Valid @RequestBody CreateReviewRequest request
     );
 
     /**
@@ -94,7 +97,7 @@ public interface IReviewController {
     })
     ResponseEntity<ReviewResponse> updateReview(
             @Parameter(description = "Review ID", required = true) UUID reviewId,
-            CreateReviewRequest request
+            @Valid @RequestBody CreateReviewRequest request
     );
 
     /**

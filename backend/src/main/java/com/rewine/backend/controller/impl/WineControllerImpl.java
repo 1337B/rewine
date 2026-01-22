@@ -8,9 +8,6 @@ import com.rewine.backend.dto.response.WineDetailsResponse;
 import com.rewine.backend.dto.response.WineSummaryResponse;
 import com.rewine.backend.model.enums.WineType;
 import com.rewine.backend.service.IWineQueryService;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
@@ -48,9 +45,9 @@ public class WineControllerImpl implements IWineController {
     @Override
     @GetMapping
     public ResponseEntity<PageResponse<WineSummaryResponse>> searchWines(
-            @Valid @ModelAttribute WineSearchRequest request,
-            @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
+            @ModelAttribute WineSearchRequest request,
+            int page,
+            int size) {
 
         LOGGER.info("GET /wines - Search wines request: page={}, size={}, filters={}", page, size, request);
 
@@ -84,8 +81,8 @@ public class WineControllerImpl implements IWineController {
             @RequestParam(required = false) Boolean featured,
             @RequestParam(required = false) WineSearchRequest.SortField sortBy,
             @RequestParam(required = false) WineSearchRequest.SortDirection sortDirection,
-            @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
 
         LOGGER.info("GET /wines/search - Explicit search: search={}, type={}, country={}", search, wineType, country);
 
@@ -150,8 +147,8 @@ public class WineControllerImpl implements IWineController {
     @Override
     @GetMapping("/featured")
     public ResponseEntity<PageResponse<WineSummaryResponse>> getFeaturedWines(
-            @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "10") @Min(1) @Max(50) int size) {
+            int page,
+            int size) {
 
         LOGGER.info("GET /wines/featured - page={}, size={}", page, size);
 
@@ -165,8 +162,8 @@ public class WineControllerImpl implements IWineController {
     @Override
     @GetMapping("/top-rated")
     public ResponseEntity<PageResponse<WineSummaryResponse>> getTopRatedWines(
-            @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "10") @Min(1) @Max(50) int size) {
+            int page,
+            int size) {
 
         LOGGER.info("GET /wines/top-rated - page={}, size={}", page, size);
 
@@ -180,8 +177,8 @@ public class WineControllerImpl implements IWineController {
     @Override
     @GetMapping("/recent")
     public ResponseEntity<PageResponse<WineSummaryResponse>> getRecentWines(
-            @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "10") @Min(1) @Max(50) int size) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
         LOGGER.info("GET /wines/recent - page={}, size={}", page, size);
 

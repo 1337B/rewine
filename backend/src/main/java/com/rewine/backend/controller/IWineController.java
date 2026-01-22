@@ -11,7 +11,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.UUID;
 
@@ -42,9 +44,9 @@ public interface IWineController {
             @ApiResponse(responseCode = "400", description = "Invalid request parameters")
     })
     ResponseEntity<PageResponse<WineSummaryResponse>> searchWines(
-            @Parameter(description = "Search and filter criteria") WineSearchRequest request,
-            @Parameter(description = "Page number (0-indexed)") int page,
-            @Parameter(description = "Page size") int size
+            @Parameter(description = "Search and filter criteria") @Valid WineSearchRequest request,
+            @Parameter(description = "Page number (0-indexed)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size
     );
 
     /**
@@ -84,8 +86,8 @@ public interface IWineController {
             @ApiResponse(responseCode = "200", description = "Featured wines retrieved")
     })
     ResponseEntity<PageResponse<WineSummaryResponse>> getFeaturedWines(
-            @Parameter(description = "Page number") int page,
-            @Parameter(description = "Page size") int size
+            @Parameter(description = "Page number") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size
     );
 
     /**
@@ -103,8 +105,8 @@ public interface IWineController {
             @ApiResponse(responseCode = "200", description = "Top-rated wines retrieved")
     })
     ResponseEntity<PageResponse<WineSummaryResponse>> getTopRatedWines(
-            @Parameter(description = "Page number") int page,
-            @Parameter(description = "Page size") int size
+            @Parameter(description = "Page number") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size
     );
 
     /**

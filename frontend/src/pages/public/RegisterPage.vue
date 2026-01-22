@@ -29,6 +29,7 @@ const authStore = useAuthStore()
 const toast = useToast()
 
 // Form state
+const username = ref('')
 const name = ref('')
 const email = ref('')
 const password = ref('')
@@ -41,6 +42,11 @@ const loading = computed(() => authStore.loading)
 const generalError = computed(() => authStore.error)
 
 // Field error getters
+const usernameError = computed(() => {
+  if (!formSubmitted.value) return undefined
+  return fieldErrors.value.username ?? authStore.getFieldError('username') ?? undefined
+})
+
 const nameError = computed(() => {
   if (!formSubmitted.value) return undefined
   return fieldErrors.value.name ?? authStore.getFieldError('name') ?? undefined
@@ -63,7 +69,7 @@ const confirmPasswordError = computed(() => {
 
 // Check if form has any field errors
 const hasErrors = computed(() => {
-  return !!(nameError.value || emailError.value || passwordError.value || confirmPasswordError.value)
+  return !!(usernameError.value || nameError.value || emailError.value || passwordError.value || confirmPasswordError.value)
 })
 
 // Password strength indicator
@@ -90,6 +96,7 @@ async function handleSubmit() {
 
   // Trim and prepare form data
   const formData = trimFormData({
+    username: username.value,
     name: name.value,
     email: email.value,
     password: password.value,
@@ -97,6 +104,7 @@ async function handleSubmit() {
   })
 
   // Update refs with trimmed values
+  username.value = formData.username
   name.value = formData.name
   email.value = formData.email
 
@@ -109,7 +117,7 @@ async function handleSubmit() {
   }
 
   try {
-    await authStore.register(formData.email, formData.password, formData.name, formData.confirmPassword)
+    await authStore.register(formData.username, formData.email, formData.password, formData.name)
     toast.success(t('auth.registerSuccess'))
     router.push('/')
   } catch {
@@ -147,6 +155,18 @@ function signupWithFacebook() {
       <!-- Registration Form -->
       <form @submit.prevent="handleSubmit" class="space-y-4" novalidate>
         <BaseInput
+          v-model="username"
+          type="text"
+          name="username"
+          :label="t('auth.username')"
+          :placeholder="t('auth.usernamePlaceholder')"
+          :error="usernameError"
+          :disabled="loading"
+          autocomplete="username"
+          required
+        />
+
+        <BaseInput
           v-model="name"
           type="text"
           name="name"
@@ -155,7 +175,6 @@ function signupWithFacebook() {
           :error="nameError"
           :disabled="loading"
           autocomplete="name"
-          required
         />
 
         <BaseInput

@@ -24,8 +24,8 @@ import type {
   AiWineProfile,
   WineScanResult,
 } from '@domain/wine/wine.types'
-import type { PaginationMeta } from '@api/api.types'
 import type { WineFilterParamsDto, CreateWineRequestDto, UpdateWineRequestDto } from '@api/dto/wines.dto'
+import type { PageMeta } from '@api/api.types'
 
 // ============================================================================
 // Result Types
@@ -33,7 +33,7 @@ import type { WineFilterParamsDto, CreateWineRequestDto, UpdateWineRequestDto } 
 
 export interface WinesResult {
   wines: WineSummary[]
-  pagination: PaginationMeta
+  pagination: PageMeta
 }
 
 export interface WineDetailsResult {
@@ -42,7 +42,7 @@ export interface WineDetailsResult {
 
 export interface WineReviewsResult {
   reviews: WineReview[]
-  pagination: PaginationMeta
+  pagination: PageMeta
 }
 
 // ============================================================================
@@ -60,13 +60,23 @@ export const winesService = {
   /**
    * Get paginated list of wines
    */
-  async getWines(filter?: WineFilter, page = 1, pageSize = 20): Promise<WinesResult> {
+  async getWines(filter?: WineFilter, page = 0, pageSize = 20): Promise<WinesResult> {
     const params = mapFilterToParams(filter, page, pageSize)
     const response = await winesClient.getWines(params)
 
+    // Backend returns items/content array
+    const items = response.items ?? response.content ?? []
+
     return {
-      wines: response.data.map(mapWineSummaryFromDto),
-      pagination: response.pagination,
+      wines: items.map(mapWineSummaryFromDto),
+      pagination: {
+        pageNumber: response.pageNumber,
+        pageSize: response.pageSize,
+        totalItems: Number(response.totalItems),
+        totalPages: response.totalPages,
+        hasNext: response.hasNext,
+        hasPrevious: response.hasPrevious,
+      },
     }
   },
 
@@ -138,12 +148,22 @@ export const winesService = {
   /**
    * Get reviews for a wine
    */
-  async getWineReviews(wineId: string, page = 1, pageSize = 10): Promise<WineReviewsResult> {
+  async getWineReviews(wineId: string, page = 0, pageSize = 10): Promise<WineReviewsResult> {
     const response = await winesClient.getWineReviews(wineId, { page, pageSize })
 
+    // Backend returns PageResponse format with items/content arrays
+    const reviews = response.items ?? response.content ?? []
+
     return {
-      reviews: response.data.map(mapWineReviewFromDto),
-      pagination: response.pagination,
+      reviews: reviews.map(mapWineReviewFromDto),
+      pagination: {
+        pageNumber: response.pageNumber ?? page,
+        pageSize: response.pageSize ?? pageSize,
+        totalItems: response.totalItems ?? 0,
+        totalPages: response.totalPages ?? 0,
+        hasNext: response.hasNext ?? false,
+        hasPrevious: response.hasPrevious ?? false,
+      },
     }
   },
 
@@ -182,18 +202,18 @@ export const winesService = {
   // ==========================================================================
 
   /**
-   * Compare multiple wines
+   * Compare two wines
    */
-  async compareWines(wineIds: string[]): Promise<WineComparison> {
-    const response = await winesClient.compareWines(wineIds)
+  async compareWines(wineAId: string, wineBId: string, language = 'es'): Promise<WineComparison> {
+    const response = await winesClient.compareWines(wineAId, wineBId, language)
     return mapWineComparisonFromDto(response)
   },
 
   /**
    * Get AI-generated wine profile
    */
-  async getAiProfile(wineId: string): Promise<AiWineProfile> {
-    const response = await winesClient.getAiProfile(wineId)
+  async getAiProfile(wineId: string, language = 'es'): Promise<AiWineProfile> {
+    const response = await winesClient.getAiProfile(wineId, language)
     return mapAiProfileFromDto(response)
   },
 
@@ -229,9 +249,19 @@ export const winesService = {
   async getFavoriteWines(page = 1, pageSize = 20): Promise<WinesResult> {
     const response = await winesClient.getFavoriteWines({ page, pageSize })
 
+    // Backend returns data array in PaginatedResponse
+    const items = response.data ?? []
+
     return {
-      wines: response.data.map(mapWineSummaryFromDto),
-      pagination: response.pagination,
+      wines: items.map(mapWineSummaryFromDto),
+      pagination: {
+        pageNumber: response.pagination?.page ?? 0,
+        pageSize: response.pagination?.pageSize ?? pageSize,
+        totalItems: Number(response.pagination?.totalItems ?? 0),
+        totalPages: response.pagination?.totalPages ?? 0,
+        hasNext: response.pagination?.hasNext ?? false,
+        hasPrevious: response.pagination?.hasPrevious ?? false,
+      },
     }
   },
 }
@@ -241,36 +271,31 @@ export const winesService = {
 // ============================================================================
 
 /**
- * Map domain filter to API filter params
+ * Map domain filter to API filter params (matches backend WineSearchRequest)
  */
 function mapFilterToParams(filter: WineFilter | undefined, page: number, pageSize: number): WineFilterParamsDto {
-  // Map sortBy from domain format to DTO format
-  const sortByMap: Record<string, 'name' | 'price' | 'rating' | 'vintage' | 'created_at'> = {
+  // Map sortBy from domain format to backend format
+  const sortByMap: Record<string, 'name' | 'vintage' | 'priceMin' | 'priceMax' | 'ratingAverage'> = {
     'name': 'name',
-    'price': 'price',
-    'rating': 'rating',
+    'price': 'priceMin',
+    'rating': 'ratingAverage',
     'vintage': 'vintage',
-    'createdAt': 'created_at',
   }
 
   return {
     page,
-    page_size: pageSize,
+    size: pageSize,
     search: filter?.search,
-    type: filter?.type,
+    wineType: filter?.type as WineFilterParamsDto['wineType'],
     region: filter?.region,
     country: filter?.country,
-    grape_variety: filter?.grapeVariety,
-    winery: filter?.winery,
-    min_price: filter?.minPrice,
-    max_price: filter?.maxPrice,
-    min_rating: filter?.minRating,
-    max_rating: filter?.maxRating,
+    minPrice: filter?.minPrice,
+    maxPrice: filter?.maxPrice,
+    minRating: filter?.minRating,
     vintage: filter?.vintage,
-    min_vintage: filter?.minVintage,
-    max_vintage: filter?.maxVintage,
-    sort_by: filter?.sortBy ? sortByMap[filter.sortBy] : undefined,
-    sort_order: filter?.sortOrder,
+    featured: filter?.featured,
+    sortBy: filter?.sortBy ? sortByMap[filter.sortBy] : undefined,
+    sortDirection: filter?.sortOrder?.toUpperCase() as 'ASC' | 'DESC' | undefined,
   }
 }
 

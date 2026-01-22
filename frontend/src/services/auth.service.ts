@@ -66,40 +66,39 @@ function parseZodErrors(error: ZodError): Record<string, string[]> {
  */
 export const authService = {
   /**
-   * Login user with email and password
+   * Login user with email/username and password
    * @throws AuthValidationError if validation fails
    * @throws AuthApiError if API call fails
    */
-  async login(email: string, password: string): Promise<AuthResult> {
-    // Validate input
-    const validationResult = loginUserSchema.safeParse({ email, password })
-
-    if (!validationResult.success) {
-      throw new AuthValidationError(
-        'Invalid login credentials',
-        parseZodErrors(validationResult.error)
-      )
+  async login(usernameOrEmail: string, password: string): Promise<AuthResult> {
+    // Basic validation
+    if (!usernameOrEmail || !password) {
+      throw new AuthValidationError('Invalid login credentials', {
+        usernameOrEmail: !usernameOrEmail ? ['Email or username is required'] : [],
+        password: !password ? ['Password is required'] : [],
+      })
     }
 
     try {
-      const data: LoginRequestDto = { email, password }
+      const data: LoginRequestDto = { usernameOrEmail, password }
       const response = await authClient.login(data)
 
       return {
         user: mapUserFromDto({
           id: response.user.id,
+          username: response.user.username,
           email: response.user.email,
-          name: response.user.name,
-          avatar: response.user.avatar,
+          name: response.user.name ?? '',
+          avatarUrl: response.user.avatarUrl,
           roles: response.user.roles,
-          is_verified: response.user.is_verified,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
+          emailVerified: response.user.emailVerified,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         }),
         tokens: {
-          accessToken: response.access_token,
-          refreshToken: response.refresh_token,
-          expiresIn: response.expires_in,
+          accessToken: response.accessToken,
+          refreshToken: response.refreshToken,
+          expiresIn: response.expiresIn,
         },
       }
     } catch (error: unknown) {
@@ -118,41 +117,36 @@ export const authService = {
    * @throws AuthValidationError if validation fails
    * @throws AuthApiError if API call fails
    */
-  async register(email: string, password: string, name: string, confirmPassword?: string): Promise<AuthResult> {
-    // Validate input
-    const validationResult = registerUserSchema.safeParse({
-      email,
-      password,
-      name,
-      confirmPassword: confirmPassword ?? password
-    })
-
-    if (!validationResult.success) {
-      throw new AuthValidationError(
-        'Invalid registration data',
-        parseZodErrors(validationResult.error)
-      )
+  async register(username: string, email: string, password: string, name?: string): Promise<AuthResult> {
+    // Basic validation
+    if (!username || !email || !password) {
+      throw new AuthValidationError('Invalid registration data', {
+        username: !username ? ['Username is required'] : [],
+        email: !email ? ['Email is required'] : [],
+        password: !password ? ['Password is required'] : [],
+      })
     }
 
     try {
-      const data: RegisterRequestDto = { email, password, name }
+      const data: RegisterRequestDto = { username, email, password, name }
       const response = await authClient.register(data)
 
       return {
         user: mapUserFromDto({
           id: response.user.id,
+          username: response.user.username,
           email: response.user.email,
-          name: response.user.name,
-          avatar: response.user.avatar,
+          name: response.user.name ?? '',
+          avatarUrl: response.user.avatarUrl,
           roles: response.user.roles,
-          is_verified: response.user.is_verified,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
+          emailVerified: response.user.emailVerified,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         }),
         tokens: {
-          accessToken: response.access_token,
-          refreshToken: response.refresh_token,
-          expiresIn: response.expires_in,
+          accessToken: response.accessToken,
+          refreshToken: response.refreshToken,
+          expiresIn: response.expiresIn,
         },
       }
     } catch (error: unknown) {
@@ -172,10 +166,10 @@ export const authService = {
    */
   async refreshToken(refreshToken: string): Promise<{ accessToken: string; expiresIn: number }> {
     try {
-      const response = await authClient.refreshToken({ refresh_token: refreshToken })
+      const response = await authClient.refreshToken({ refreshToken })
       return {
-        accessToken: response.access_token,
-        expiresIn: response.expires_in,
+        accessToken: response.accessToken,
+        expiresIn: response.expiresIn,
       }
     } catch (error: unknown) {
       if (error instanceof Error && 'response' in error) {
@@ -206,13 +200,14 @@ export const authService = {
       const response = await authClient.getCurrentUser()
       return mapUserFromDto({
         id: response.id,
+        username: response.username,
         email: response.email,
-        name: response.name,
-        avatar: response.avatar,
+        name: response.name ?? '',
+        avatarUrl: response.avatarUrl,
         roles: response.roles,
-        is_verified: response.is_verified,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        emailVerified: response.emailVerified,
+        createdAt: response.createdAt ?? new Date().toISOString(),
+        updatedAt: response.updatedAt ?? new Date().toISOString(),
       })
     } catch (error: unknown) {
       if (error instanceof Error && 'response' in error) {

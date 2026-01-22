@@ -1,5 +1,6 @@
 package com.rewine.backend.controller;
 
+import com.rewine.backend.dto.common.PageResponse;
 import com.rewine.backend.dto.response.WineRouteDetailsResponse;
 import com.rewine.backend.dto.response.WineRouteHierarchyResponse;
 import com.rewine.backend.dto.response.WineRouteSummaryResponse;
@@ -8,9 +9,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.UUID;
@@ -78,12 +80,12 @@ public interface IWineRouteController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Routes retrieved successfully")
     })
-    ResponseEntity<Page<WineRouteSummaryResponse>> listRoutes(
-            @Parameter(description = "Filter by country") String country,
-            @Parameter(description = "Filter by region") String region,
-            @Parameter(description = "Filter by subregion") String subregion,
-            @Parameter(description = "Search query") String search,
-            Pageable pageable
+    ResponseEntity<PageResponse<WineRouteSummaryResponse>> listRoutes(
+            @Parameter(description = "Filter by country") @RequestParam(required = false) String country,
+            @Parameter(description = "Filter by region") @RequestParam(required = false) String region,
+            @Parameter(description = "Filter by subregion") @RequestParam(required = false) String subregion,
+            @Parameter(description = "Search query") @RequestParam(required = false) String search,
+            @PageableDefault(size = 20, sort = "name") Pageable pageable
     );
 
     @Operation(

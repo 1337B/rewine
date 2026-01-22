@@ -1,6 +1,7 @@
 package com.rewine.backend.controller.impl;
 
 import com.rewine.backend.controller.IWineRouteController;
+import com.rewine.backend.dto.common.PageResponse;
 import com.rewine.backend.dto.response.WineRouteDetailsResponse;
 import com.rewine.backend.dto.response.WineRouteHierarchyResponse;
 import com.rewine.backend.dto.response.WineRouteSummaryResponse;
@@ -10,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -81,12 +81,12 @@ public class WineRouteControllerImpl implements IWineRouteController {
 
     @Override
     @GetMapping
-    public ResponseEntity<Page<WineRouteSummaryResponse>> listRoutes(
+    public ResponseEntity<PageResponse<WineRouteSummaryResponse>> listRoutes(
             @RequestParam(required = false) String country,
             @RequestParam(required = false) String region,
             @RequestParam(required = false) String subregion,
             @RequestParam(required = false) String search,
-            @PageableDefault(size = 20, sort = "name") Pageable pageable) {
+            Pageable pageable) {
 
         log.info("GET /wine-routes - Listing routes (country={}, region={}, subregion={}, search={})",
                 country, region, subregion, search);
@@ -99,7 +99,7 @@ public class WineRouteControllerImpl implements IWineRouteController {
             routes = wineRouteService.listRoutes(country, region, subregion, pageable);
         }
 
-        return ResponseEntity.ok(routes);
+        return ResponseEntity.ok(PageResponse.from(routes));
     }
 
     @Override

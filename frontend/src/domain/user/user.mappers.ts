@@ -21,18 +21,19 @@ function mapRole(role: string): UserRole {
 
 /**
  * Map User DTO to domain model
+ * Handles both camelCase (backend) and snake_case (legacy) formats
  */
 export function mapUserFromDto(dto: UserDto): User {
   return {
     id: dto.id,
     email: dto.email,
-    name: dto.name,
-    avatar: dto.avatar ?? null,
-    roles: (dto.roles ?? ['user']).map(mapRole),
+    name: dto.name ?? '',
+    avatar: dto.avatarUrl ?? dto.avatar ?? null,
+    roles: (dto.roles ?? ['ROLE_USER']).map(mapRole),
     preferences: dto.preferences ? mapUserPreferencesFromDto(dto.preferences) : getDefaultPreferences(),
-    isVerified: dto.is_verified ?? false,
-    createdAt: new Date(dto.created_at),
-    updatedAt: new Date(dto.updated_at),
+    isVerified: dto.emailVerified ?? dto.is_verified ?? false,
+    createdAt: new Date(dto.createdAt ?? dto.created_at ?? new Date().toISOString()),
+    updatedAt: new Date(dto.updatedAt ?? dto.updated_at ?? new Date().toISOString()),
   }
 }
 

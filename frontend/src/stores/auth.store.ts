@@ -110,12 +110,12 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function register(email: string, password: string, name: string, confirmPassword?: string): Promise<void> {
+  async function register(username: string, email: string, password: string, name?: string): Promise<void> {
     loading.value = true
     clearErrors()
 
     try {
-      const result = await authService.register(email, password, name, confirmPassword)
+      const result = await authService.register(username, email, password, name)
       setSession(result.user, result.tokens.accessToken, result.tokens.refreshToken)
     } catch (err: unknown) {
       handleAuthError(err)

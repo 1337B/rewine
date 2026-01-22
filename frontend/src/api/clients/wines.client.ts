@@ -3,11 +3,12 @@
  *
  * Handles all wine-related API calls.
  * Uses the configured axios instance for automatic token handling.
+ * Note: Backend returns data directly (no wrapper).
  */
 
 import http from '@app/http'
 import { API_ENDPOINTS } from '@config/constants'
-import type { ApiResponse, PaginatedResponse } from '@api/api.types'
+import type { PaginatedResponse } from '@api/api.types'
 import type {
   WineSummaryDto,
   WineDetailsDto,
@@ -19,6 +20,8 @@ import type {
   CompareResultDto,
   AiProfileDto,
   WineScanResultDto,
+  WinesPageResponseDto,
+  ReviewsPageResponseDto,
 } from '@api/dto/wines.dto'
 
 /**
@@ -33,8 +36,8 @@ export const winesClient = {
    * Get paginated list of wines
    * @param params Filter and pagination parameters
    */
-  async getWines(params?: WineFilterParamsDto): Promise<PaginatedResponse<WineSummaryDto>> {
-    const response = await http.get<PaginatedResponse<WineSummaryDto>>(API_ENDPOINTS.WINES, {
+  async getWines(params?: WineFilterParamsDto): Promise<WinesPageResponseDto> {
+    const response = await http.get<WinesPageResponseDto>(API_ENDPOINTS.WINES, {
       params,
     })
     return response.data
@@ -45,8 +48,8 @@ export const winesClient = {
    * @param id Wine ID
    */
   async getWine(id: string): Promise<WineDetailsDto> {
-    const response = await http.get<ApiResponse<WineDetailsDto>>(`${API_ENDPOINTS.WINES}/${id}`)
-    return response.data.data
+    const response = await http.get<WineDetailsDto>(`${API_ENDPOINTS.WINES}/${id}`)
+    return response.data
   },
 
   /**
@@ -54,8 +57,8 @@ export const winesClient = {
    * @param data Wine data
    */
   async createWine(data: CreateWineRequestDto): Promise<WineDetailsDto> {
-    const response = await http.post<ApiResponse<WineDetailsDto>>(API_ENDPOINTS.WINES, data)
-    return response.data.data
+    const response = await http.post<WineDetailsDto>(API_ENDPOINTS.WINES, data)
+    return response.data
   },
 
   /**
@@ -64,11 +67,11 @@ export const winesClient = {
    * @param data Partial wine data
    */
   async updateWine(id: string, data: UpdateWineRequestDto): Promise<WineDetailsDto> {
-    const response = await http.patch<ApiResponse<WineDetailsDto>>(
+    const response = await http.patch<WineDetailsDto>(
       `${API_ENDPOINTS.WINES}/${id}`,
       data
     )
-    return response.data.data
+    return response.data
   },
 
   /**
@@ -91,10 +94,10 @@ export const winesClient = {
   async getWineReviews(
     wineId: string,
     params?: { page?: number; pageSize?: number }
-  ): Promise<PaginatedResponse<WineReviewDto>> {
-    const response = await http.get<PaginatedResponse<WineReviewDto>>(
+  ): Promise<ReviewsPageResponseDto> {
+    const response = await http.get<ReviewsPageResponseDto>(
       `${API_ENDPOINTS.WINES}/${wineId}/reviews`,
-      { params: { page: params?.page, page_size: params?.pageSize } }
+      { params: { page: params?.page, size: params?.pageSize } }
     )
     return response.data
   },
@@ -105,11 +108,11 @@ export const winesClient = {
    * @param data Review data
    */
   async createWineReview(wineId: string, data: CreateWineReviewRequestDto): Promise<WineReviewDto> {
-    const response = await http.post<ApiResponse<WineReviewDto>>(
+    const response = await http.post<WineReviewDto>(
       `${API_ENDPOINTS.WINES}/${wineId}/reviews`,
       data
     )
-    return response.data.data
+    return response.data
   },
 
   /**
@@ -123,11 +126,11 @@ export const winesClient = {
     reviewId: string,
     data: CreateWineReviewRequestDto
   ): Promise<WineReviewDto> {
-    const response = await http.patch<ApiResponse<WineReviewDto>>(
+    const response = await http.patch<WineReviewDto>(
       `${API_ENDPOINTS.WINES}/${wineId}/reviews/${reviewId}`,
       data
     )
-    return response.data.data
+    return response.data
   },
 
   /**
@@ -140,12 +143,15 @@ export const winesClient = {
   },
 
   /**
-   * Mark a review as helpful
+   * Mark a review as helpful (toggle like)
    * @param wineId Wine ID
    * @param reviewId Review ID
    */
-  async markReviewHelpful(wineId: string, reviewId: string): Promise<void> {
-    await http.post(`${API_ENDPOINTS.WINES}/${wineId}/reviews/${reviewId}/helpful`)
+  async markReviewHelpful(wineId: string, reviewId: string): Promise<boolean> {
+    const response = await http.post<boolean>(
+      `${API_ENDPOINTS.WINES}/${wineId}/reviews/${reviewId}/like`
+    )
+    return response.data
   },
 
   // ============================================================================
@@ -158,11 +164,11 @@ export const winesClient = {
    * @param limit Maximum number of results
    */
   async getSimilarWines(wineId: string, limit = 5): Promise<WineSummaryDto[]> {
-    const response = await http.get<ApiResponse<WineSummaryDto[]>>(
+    const response = await http.get<WineSummaryDto[]>(
       `${API_ENDPOINTS.WINES}/${wineId}/similar`,
       { params: { limit } }
     )
-    return response.data.data
+    return response.data
   },
 
   /**
@@ -170,11 +176,11 @@ export const winesClient = {
    * @param limit Maximum number of results
    */
   async getRecommendedWines(limit = 10): Promise<WineSummaryDto[]> {
-    const response = await http.get<ApiResponse<WineSummaryDto[]>>(
+    const response = await http.get<WineSummaryDto[]>(
       `${API_ENDPOINTS.WINES}/recommended`,
       { params: { limit } }
     )
-    return response.data.data
+    return response.data
   },
 
   /**
@@ -182,11 +188,11 @@ export const winesClient = {
    * @param limit Maximum number of results
    */
   async getPopularWines(limit = 10): Promise<WineSummaryDto[]> {
-    const response = await http.get<ApiResponse<WineSummaryDto[]>>(
+    const response = await http.get<WineSummaryDto[]>(
       `${API_ENDPOINTS.WINES}/popular`,
       { params: { limit } }
     )
-    return response.data.data
+    return response.data
   },
 
   // ============================================================================
@@ -194,26 +200,43 @@ export const winesClient = {
   // ============================================================================
 
   /**
-   * Compare multiple wines
-   * @param wineIds Array of wine IDs to compare
+   * Compare two wines
+   * @param wineAId First wine ID
+   * @param wineBId Second wine ID
+   * @param language Language for comparison (e.g., 'es', 'en')
    */
-  async compareWines(wineIds: string[]): Promise<CompareResultDto> {
-    const response = await http.post<ApiResponse<CompareResultDto>>(
+  async compareWines(wineAId: string, wineBId: string, language = 'es'): Promise<CompareResultDto> {
+    const response = await http.post<CompareResultDto>(
       `${API_ENDPOINTS.WINES}/compare`,
-      { wine_ids: wineIds }
+      { wineAId, wineBId, language }
     )
-    return response.data.data
+    return response.data
   },
 
   /**
    * Get AI-generated wine profile
    * @param wineId Wine ID
+   * @param language Language for profile (e.g., 'es', 'en')
    */
-  async getAiProfile(wineId: string): Promise<AiProfileDto> {
-    const response = await http.get<ApiResponse<AiProfileDto>>(
-      `${API_ENDPOINTS.WINES}/${wineId}/ai-profile`
+  async getAiProfile(wineId: string, language = 'es'): Promise<AiProfileDto> {
+    const response = await http.get<AiProfileDto>(
+      `${API_ENDPOINTS.WINES}/${wineId}/ai-profile`,
+      { params: { language } }
     )
-    return response.data.data
+    return response.data
+  },
+
+  /**
+   * Generate AI profile for a wine
+   * @param wineId Wine ID
+   * @param language Language for profile
+   */
+  async generateAiProfile(wineId: string, language = 'es'): Promise<AiProfileDto> {
+    const response = await http.post<AiProfileDto>(
+      `${API_ENDPOINTS.WINES}/${wineId}/ai-profile`,
+      { language }
+    )
+    return response.data
   },
 
   /**
@@ -223,17 +246,17 @@ export const winesClient = {
   async scanWineLabel(imageFile: File | string): Promise<WineScanResultDto> {
     const formData = new FormData()
     if (typeof imageFile === 'string') {
-      formData.append('image_base64', imageFile)
+      formData.append('imageBase64', imageFile)
     } else {
       formData.append('image', imageFile)
     }
 
-    const response = await http.post<ApiResponse<WineScanResultDto>>(
+    const response = await http.post<WineScanResultDto>(
       `${API_ENDPOINTS.WINES}/scan`,
       formData,
       { headers: { 'Content-Type': 'multipart/form-data' } }
     )
-    return response.data.data
+    return response.data
   },
 
   // ============================================================================
@@ -265,7 +288,7 @@ export const winesClient = {
   ): Promise<PaginatedResponse<WineSummaryDto>> {
     const response = await http.get<PaginatedResponse<WineSummaryDto>>(
       `${API_ENDPOINTS.WINES}/favorites`,
-      { params: { page: params?.page, page_size: params?.pageSize } }
+      { params: { page: params?.page, size: params?.pageSize } }
     )
     return response.data
   },

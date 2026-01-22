@@ -121,8 +121,8 @@ public interface IEventRepository extends JpaRepository<EventEntity, UUID> {
             + "WHERE e.status = :status "
             + "AND e.startDate >= :fromDate "
             + "AND (:type IS NULL OR e.type = :type) "
-            + "AND (:city IS NULL OR LOWER(e.locationCity) LIKE LOWER(CONCAT('%', :city, '%'))) "
-            + "AND (:region IS NULL OR LOWER(e.locationRegion) LIKE LOWER(CONCAT('%', :region, '%')))")
+            + "AND (:city IS NULL OR LOWER(CAST(e.locationCity AS string)) LIKE LOWER(CAST(CONCAT('%', :city, '%') AS string))) "
+            + "AND (:region IS NULL OR LOWER(CAST(e.locationRegion AS string)) LIKE LOWER(CAST(CONCAT('%', :region, '%') AS string)))")
     Page<EventEntity> findPublishedEvents(
             @Param("status") EventStatus status,
             @Param("type") EventType type,

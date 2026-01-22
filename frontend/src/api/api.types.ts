@@ -111,10 +111,11 @@ export interface PageRequest {
 
 /**
  * Pagination metadata in response
+ * Note: Uses 'pageNumber' to match backend response format.
  */
 export interface PageMeta {
-  /** Current page number (1-based) */
-  page: number
+  /** Current page number (0-based) */
+  pageNumber: number
   /** Number of items per page */
   pageSize: number
   /** Total number of items */

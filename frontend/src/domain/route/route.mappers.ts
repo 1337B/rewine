@@ -1,28 +1,58 @@
 import type { WineRoute, RouteStop, RouteLocation, RouteWinery, WineRouteReview } from './route.types'
-import type { WineRouteDto, RouteStopDto, RouteLocationDto, RouteWineryDto, WineRouteReviewDto } from '@api/dto/wineRoutes.dto'
+import type {
+  WineRouteDetailsDto,
+  WineRouteSummaryDto,
+  RouteStopDto,
+  RouteWineryDto,
+} from '@api/dto/wineRoutes.dto'
 
 /**
- * Map Wine Route DTO to domain model
+ * Map Wine Route Summary DTO to domain model (for list views)
  */
-export function mapWineRouteFromDto(dto: WineRouteDto): WineRoute {
+export function mapWineRouteSummaryFromDto(dto: WineRouteSummaryDto): WineRoute {
   return {
     id: dto.id,
     name: dto.name,
-    description: dto.description,
-    region: dto.region,
-    country: dto.country,
-    difficulty: dto.difficulty,
-    duration: dto.duration,
-    distance: dto.distance,
+    description: dto.description ?? '',
+    region: dto.region ?? '',
+    country: dto.country ?? '',
+    difficulty: (dto.difficulty as WineRoute['difficulty']) ?? 'moderate',
+    duration: dto.estimatedDuration ?? dto.estimatedDays ?? 0,
+    distance: dto.totalDistance ?? 0,
+    stops: [],
+    imageUrl: dto.imageUrl ?? null,
+    rating: null,
+    reviewCount: 0,
+    tags: [],
+    isPublished: dto.status === 'ACTIVE',
+    createdBy: '',
+    createdAt: dto.createdAt ? new Date(dto.createdAt) : new Date(),
+    updatedAt: new Date(),
+  }
+}
+
+/**
+ * Map Wine Route Details DTO to domain model (for detail views)
+ */
+export function mapWineRouteFromDto(dto: WineRouteDetailsDto): WineRoute {
+  return {
+    id: dto.id,
+    name: dto.name,
+    description: dto.description ?? '',
+    region: dto.region ?? '',
+    country: dto.country ?? '',
+    difficulty: (dto.difficulty as WineRoute['difficulty']) ?? 'moderate',
+    duration: dto.estimatedDuration ?? dto.estimatedDays ?? 0,
+    distance: dto.totalDistance ?? 0,
     stops: dto.stops?.map(mapRouteStopFromDto) ?? [],
-    imageUrl: dto.image_url ?? null,
-    rating: dto.rating ?? null,
-    reviewCount: dto.review_count ?? 0,
-    tags: dto.tags ?? [],
-    isPublished: dto.is_published ?? false,
-    createdBy: dto.created_by,
-    createdAt: new Date(dto.created_at),
-    updatedAt: new Date(dto.updated_at),
+    imageUrl: dto.imageUrl ?? null,
+    rating: null,
+    reviewCount: 0,
+    tags: dto.recommendedWineTypes ?? [],
+    isPublished: dto.status === 'ACTIVE',
+    createdBy: dto.createdById ?? '',
+    createdAt: dto.createdAt ? new Date(dto.createdAt) : new Date(),
+    updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : new Date(),
   }
 }
 
@@ -32,25 +62,18 @@ export function mapWineRouteFromDto(dto: WineRouteDto): WineRoute {
 export function mapRouteStopFromDto(dto: RouteStopDto): RouteStop {
   return {
     id: dto.id,
-    order: dto.order,
+    order: dto.stopOrder ?? 0,
     name: dto.name,
-    type: dto.type,
-    description: dto.description,
-    location: mapRouteLocationFromDto(dto.location),
-    duration: dto.duration,
-    winery: dto.winery ? mapRouteWineryFromDto(dto.winery) : null,
-  }
-}
-
-/**
- * Map Route Location DTO to domain model
- */
-export function mapRouteLocationFromDto(dto: RouteLocationDto): RouteLocation {
-  return {
-    address: dto.address,
-    city: dto.city,
-    latitude: dto.latitude,
-    longitude: dto.longitude,
+    type: (dto.type as RouteStop['type']) ?? 'winery',
+    description: dto.description ?? '',
+    location: {
+      address: dto.address ?? '',
+      city: '',
+      latitude: dto.latitude ?? 0,
+      longitude: dto.longitude ?? 0,
+    },
+    duration: dto.estimatedDuration ?? 0,
+    winery: null,
   }
 }
 
@@ -61,41 +84,24 @@ export function mapRouteWineryFromDto(dto: RouteWineryDto): RouteWinery {
   return {
     id: dto.id,
     name: dto.name,
-    wines: dto.wines ?? [],
-  }
-}
-
-/**
- * Map Wine Route Review DTO to domain model
- */
-export function mapWineRouteReviewFromDto(dto: WineRouteReviewDto): WineRouteReview {
-  return {
-    id: dto.id,
-    routeId: dto.route_id,
-    userId: dto.user_id,
-    userName: dto.user_name,
-    rating: dto.rating,
-    comment: dto.comment,
-    visitedAt: new Date(dto.visited_at),
-    createdAt: new Date(dto.created_at),
+    wines: [],
   }
 }
 
 /**
  * Map Wine Route domain model to DTO for API requests
  */
-export function mapWineRouteToDto(route: Partial<WineRoute>): Partial<WineRouteDto> {
+export function mapWineRouteToDto(route: Partial<WineRoute>): Record<string, unknown> {
   return {
     name: route.name,
     description: route.description,
     region: route.region,
     country: route.country,
     difficulty: route.difficulty,
-    duration: route.duration,
-    distance: route.distance,
-    image_url: route.imageUrl ?? undefined,
-    tags: route.tags,
-    is_published: route.isPublished,
+    estimatedDuration: route.duration,
+    totalDistance: route.distance,
+    imageUrl: route.imageUrl ?? undefined,
+    recommendedWineTypes: route.tags,
   }
 }
 

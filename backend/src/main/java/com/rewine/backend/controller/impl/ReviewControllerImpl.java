@@ -51,9 +51,9 @@ public class ReviewControllerImpl implements IReviewController {
     @GetMapping("/wines/{wineId}/reviews")
     public ResponseEntity<PageResponse<ReviewResponse>> getWineReviews(
             @PathVariable UUID wineId,
-            @RequestParam(required = false) ReviewFilter filter,
-            @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "10") @Min(1) @Max(50) int size) {
+            ReviewFilter filter,
+            int page,
+            int size) {
 
         LOGGER.info("GET /wines/{}/reviews - filter={}, page={}, size={}", wineId, filter, page, size);
 
@@ -102,7 +102,7 @@ public class ReviewControllerImpl implements IReviewController {
     @PostMapping("/wines/{wineId}/reviews")
     public ResponseEntity<ReviewResponse> createReview(
             @PathVariable UUID wineId,
-            @Valid @RequestBody CreateReviewRequest request) {
+            CreateReviewRequest request) {
 
         LOGGER.info("POST /wines/{}/reviews - Creating review", wineId);
 
@@ -139,7 +139,7 @@ public class ReviewControllerImpl implements IReviewController {
     @PutMapping("/reviews/{reviewId}")
     public ResponseEntity<ReviewResponse> updateReview(
             @PathVariable UUID reviewId,
-            @Valid @RequestBody CreateReviewRequest request) {
+            CreateReviewRequest request) {
 
         LOGGER.info("PUT /reviews/{} - Updating review", reviewId);
 

@@ -1,12 +1,12 @@
 import { eventsClient } from '@api/clients/events.client'
-import { mapEventFromDto, mapEventAttendeeFromDto, mapEventToDto } from '@domain/event/event.mappers'
+import { mapEventFromDto, mapEventSummaryFromDto, mapEventAttendeeFromDto, mapEventToDto } from '@domain/event/event.mappers'
 import type { Event, EventFilter, EventAttendee } from '@domain/event/event.types'
-import type { PaginationMeta } from '@api/api.types'
 import type { EventFilterParamsDto, CreateEventRequestDto } from '@api/dto/events.dto'
+import type { PageMeta } from '@api/api.types'
 
 export interface EventsResult {
   events: Event[]
-  pagination: PaginationMeta
+  pagination: PageMeta
 }
 
 /**
@@ -16,28 +16,60 @@ export const eventsService = {
   /**
    * Get paginated list of events
    */
-  async getEvents(filter?: EventFilter, page = 1, pageSize = 20): Promise<EventsResult> {
+  async getEvents(filter?: EventFilter, page = 0, pageSize = 20): Promise<EventsResult> {
     const params: EventFilterParamsDto = {
       page,
-      page_size: pageSize,
+      size: pageSize,
       search: filter?.search,
       type: filter?.type,
       city: filter?.city,
       region: filter?.region,
-      start_date: filter?.startDate?.toISOString(),
-      end_date: filter?.endDate?.toISOString(),
-      min_price: filter?.minPrice,
-      max_price: filter?.maxPrice,
+      startDate: filter?.startDate?.toISOString(),
+      endDate: filter?.endDate?.toISOString(),
+      minPrice: filter?.minPrice,
+      maxPrice: filter?.maxPrice,
       status: filter?.status,
-      sort_by: filter?.sortBy,
-      sort_order: filter?.sortOrder,
+      sortBy: filter?.sortBy as EventFilterParamsDto['sortBy'],
+      sortDirection: filter?.sortOrder?.toUpperCase() as 'ASC' | 'DESC',
     }
 
     const response = await eventsClient.getEvents(params)
 
+    // Backend returns PageResponse format with items/content
+    const items = response.items ?? response.content ?? []
+
     return {
-      events: response.data.map(mapEventFromDto),
-      pagination: response.pagination,
+      events: items.map(mapEventSummaryFromDto),
+      pagination: {
+        pageNumber: response.pageNumber ?? page,
+        pageSize: response.pageSize ?? pageSize,
+        totalItems: response.totalItems ?? 0,
+        totalPages: response.totalPages ?? 0,
+        hasNext: response.hasNext ?? false,
+        hasPrevious: response.hasPrevious ?? false,
+      },
+    }
+  },
+
+  /**
+   * Get nearby events
+   */
+  async getNearbyEvents(latitude: number, longitude: number, radiusKm = 50, page = 0, pageSize = 20): Promise<EventsResult> {
+    const response = await eventsClient.getNearbyEvents(latitude, longitude, radiusKm, page, pageSize)
+
+    // Backend returns PageResponse format
+    const items = response.items ?? response.content ?? []
+
+    return {
+      events: items.map(mapEventSummaryFromDto),
+      pagination: {
+        pageNumber: response.pageNumber ?? page,
+        pageSize: response.pageSize ?? pageSize,
+        totalItems: response.totalItems ?? 0,
+        totalPages: response.totalPages ?? 0,
+        hasNext: response.hasNext ?? false,
+        hasPrevious: response.hasPrevious ?? false,
+      },
     }
   },
 
@@ -86,7 +118,7 @@ export const eventsService = {
    * Register for an event
    */
   async registerForEvent(eventId: string): Promise<EventAttendee> {
-    const response = await eventsClient.registerForEvent({ event_id: eventId })
+    const response = await eventsClient.registerForEvent(eventId)
     return mapEventAttendeeFromDto(response)
   },
 
@@ -96,15 +128,6 @@ export const eventsService = {
   async cancelRegistration(eventId: string): Promise<void> {
     await eventsClient.cancelRegistration(eventId)
   },
-
-  /**
-   * Get nearby events
-   */
-  async getNearbyEvents(latitude: number, longitude: number, radiusKm = 50): Promise<Event[]> {
-    const response = await eventsClient.getNearbyEvents(latitude, longitude, radiusKm)
-    return response.map(mapEventFromDto)
-  },
 }
 
 export default eventsService
-

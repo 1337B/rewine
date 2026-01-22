@@ -3,6 +3,7 @@
  *
  * Data Transfer Objects for user API endpoints.
  * These represent the exact shape of data sent to/from the backend.
+ * Note: Backend uses camelCase for all JSON fields.
  */
 
 import type { UserRole } from '@domain/user/user.types'
@@ -13,19 +14,29 @@ import type { UserRole } from '@domain/user/user.types'
 
 /**
  * Full user data (admin/self view)
+ * Supports both camelCase (backend) and snake_case (legacy) fields
  */
 export interface UserDto {
   id: string
+  username?: string
   email: string
   name: string
   avatar?: string | null
-  roles?: UserRole[]
+  avatarUrl?: string | null
+  roles?: string[]
   preferences?: UserPreferencesDto | null
+  // camelCase (from backend)
+  emailVerified?: boolean
+  isActive?: boolean
+  lastLoginAt?: string | null
+  createdAt?: string
+  updatedAt?: string
+  // snake_case (legacy support)
   is_verified?: boolean
   is_active?: boolean
   last_login_at?: string | null
-  created_at: string
-  updated_at: string
+  created_at?: string
+  updated_at?: string
 }
 
 /**

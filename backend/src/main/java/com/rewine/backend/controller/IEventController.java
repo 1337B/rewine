@@ -14,7 +14,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -49,12 +52,12 @@ public interface IEventController {
             @ApiResponse(responseCode = "400", description = "Invalid request parameters")
     })
     ResponseEntity<PageResponse<EventSummaryResponse>> listEvents(
-            @Parameter(description = "Filter by event type") EventType type,
-            @Parameter(description = "Filter by city") String city,
-            @Parameter(description = "Filter by region") String region,
-            @Parameter(description = "Search in title and description") String search,
-            @Parameter(description = "Page number (0-indexed)") int page,
-            @Parameter(description = "Page size") int size
+            @Parameter(description = "Filter by event type") @RequestParam(required = false) EventType type,
+            @Parameter(description = "Filter by city") @RequestParam(required = false) String city,
+            @Parameter(description = "Filter by region") @RequestParam(required = false) String region,
+            @Parameter(description = "Search in title and description") @RequestParam(required = false) String search,
+            @Parameter(description = "Page number (0-indexed)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size
     );
 
     /**
@@ -79,11 +82,11 @@ public interface IEventController {
             @ApiResponse(responseCode = "400", description = "Invalid coordinates")
     })
     ResponseEntity<PageResponse<EventSummaryResponse>> listNearbyEvents(
-            @Parameter(description = "Center latitude", required = true) BigDecimal latitude,
-            @Parameter(description = "Center longitude", required = true) BigDecimal longitude,
-            @Parameter(description = "Search radius in kilometers") Double radiusKm,
-            @Parameter(description = "Page number") int page,
-            @Parameter(description = "Page size") int size
+            @Parameter(description = "Center latitude", required = true) @RequestParam BigDecimal latitude,
+            @Parameter(description = "Center longitude", required = true) @RequestParam BigDecimal longitude,
+            @Parameter(description = "Search radius in kilometers") @RequestParam(required = false) Double radiusKm,
+            @Parameter(description = "Page number") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size
     );
 
     /**
@@ -130,7 +133,7 @@ public interface IEventController {
             @ApiResponse(responseCode = "401", description = "Not authenticated"),
             @ApiResponse(responseCode = "403", description = "Not authorized")
     })
-    ResponseEntity<EventDetailsResponse> createEvent(CreateEventRequest request);
+    ResponseEntity<EventDetailsResponse> createEvent(@Valid @RequestBody CreateEventRequest request);
 
     /**
      * Updates an existing event.
@@ -158,7 +161,7 @@ public interface IEventController {
     })
     ResponseEntity<EventDetailsResponse> updateEvent(
             @Parameter(description = "Event ID", required = true) UUID id,
-            UpdateEventRequest request
+            @Valid @RequestBody UpdateEventRequest request
     );
 
     /**

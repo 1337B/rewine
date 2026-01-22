@@ -52,7 +52,9 @@ export interface RouteWinery {
 
 export interface WineRouteFilter {
   search?: string
-  region?: string | string[]
+  country?: string
+  region?: string
+  subregion?: string
   difficulty?: RouteDifficulty | RouteDifficulty[]
   minDuration?: number
   maxDuration?: number
@@ -61,6 +63,20 @@ export interface WineRouteFilter {
   minRating?: number
   sortBy?: 'name' | 'rating' | 'duration' | 'distance'
   sortOrder?: 'asc' | 'desc'
+}
+
+export interface WineRouteHierarchy {
+  countries: WineRouteHierarchyCountry[]
+}
+
+export interface WineRouteHierarchyCountry {
+  name: string
+  regions: WineRouteHierarchyRegion[]
+}
+
+export interface WineRouteHierarchyRegion {
+  name: string
+  subregions: string[]
 }
 
 export interface WineRouteReview {

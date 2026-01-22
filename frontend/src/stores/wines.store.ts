@@ -82,7 +82,7 @@ export const useWinesStore = defineStore('wines', () => {
   // Actions - Wine Fetching
   // ============================================================================
 
-  async function fetchWines(page = 1, pageSize = 20) {
+  async function fetchWines(page = 0, pageSize = 20) {
     loading.value = true
     error.value = null
 
@@ -153,8 +153,10 @@ export const useWinesStore = defineStore('wines', () => {
   /**
    * Compare wines with caching
    * Returns cached result if available, otherwise fetches from API
+   * @param wineIds Array of wine IDs to compare (at least 2)
+   * @param language Language for comparison (default: 'es')
    */
-  async function compareWines(wineIds: string[]): Promise<WineComparison & { fromCache: boolean }> {
+  async function compareWinesAction(wineIds: string[], language = 'es'): Promise<WineComparison & { fromCache: boolean }> {
     if (wineIds.length < 2) {
       throw new Error('Need at least 2 wines to compare')
     }
@@ -170,7 +172,8 @@ export const useWinesStore = defineStore('wines', () => {
     error.value = null
 
     try {
-      const result = await winesService.compareWines(wineIds)
+      // Service expects two IDs separately
+      const result = await winesService.compareWines(wineIds[0], wineIds[1], language)
       const cachedResult = { ...result, cachedAt: new Date() }
       comparisonsByKey.value.set(key, cachedResult)
       return { ...cachedResult, fromCache: false }
@@ -287,7 +290,7 @@ export const useWinesStore = defineStore('wines', () => {
     addToComparison,
     removeFromComparison,
     clearComparison,
-    compareWines,
+    compareWines: compareWinesAction,
     getAiProfile,
     clearComparisonCache,
     clearAiProfileCache,

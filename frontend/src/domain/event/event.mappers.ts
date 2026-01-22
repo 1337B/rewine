@@ -1,54 +1,77 @@
 import type { Event, EventLocation, EventOrganizer, EventAttendee } from './event.types'
-import type { EventDto, EventLocationDto, EventOrganizerDto, EventAttendeeDto } from '@api/dto/events.dto'
+import type { EventDto, EventDetailsDto, EventSummaryDto, EventAttendeeDto, CreateEventRequestDto } from '@api/dto/events.dto'
 
 /**
- * Map Event DTO to domain model
+ * Map Event summary DTO to domain model
  */
-export function mapEventFromDto(dto: EventDto): Event {
+export function mapEventSummaryFromDto(dto: EventSummaryDto): Event {
+  return {
+    id: dto.id,
+    title: dto.title,
+    description: '',
+    type: dto.type,
+    startDate: new Date(dto.startDate),
+    endDate: new Date(dto.endDate),
+    location: {
+      name: dto.locationName,
+      address: '',
+      city: dto.locationCity,
+      region: dto.locationRegion ?? '',
+      country: '',
+      latitude: dto.latitude ?? null,
+      longitude: dto.longitude ?? null,
+    },
+    organizer: {
+      id: dto.organizerId ?? '',
+      name: dto.organizerName ?? '',
+      email: '',
+      phone: null,
+    },
+    imageUrl: dto.imageUrl ?? null,
+    price: dto.price ? Number(dto.price) : null,
+    maxAttendees: dto.maxAttendees ?? null,
+    currentAttendees: dto.currentAttendees ?? 0,
+    tags: [],
+    status: dto.status,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }
+}
+
+/**
+ * Map Event details DTO to domain model
+ */
+export function mapEventFromDto(dto: EventDetailsDto): Event {
   return {
     id: dto.id,
     title: dto.title,
     description: dto.description,
     type: dto.type,
-    startDate: new Date(dto.start_date),
-    endDate: new Date(dto.end_date),
-    location: mapEventLocationFromDto(dto.location),
-    organizer: mapEventOrganizerFromDto(dto.organizer),
-    imageUrl: dto.image_url ?? null,
-    price: dto.price ?? null,
-    maxAttendees: dto.max_attendees ?? null,
-    currentAttendees: dto.current_attendees ?? 0,
-    tags: dto.tags ?? [],
+    startDate: new Date(dto.startDate),
+    endDate: new Date(dto.endDate),
+    location: {
+      name: dto.locationName,
+      address: dto.locationAddress ?? '',
+      city: dto.locationCity,
+      region: dto.locationRegion ?? '',
+      country: '',
+      latitude: dto.latitude ?? null,
+      longitude: dto.longitude ?? null,
+    },
+    organizer: {
+      id: dto.organizerId ?? '',
+      name: dto.organizerName ?? '',
+      email: dto.contactEmail ?? '',
+      phone: dto.contactPhone ?? null,
+    },
+    imageUrl: dto.imageUrl ?? null,
+    price: dto.price ? Number(dto.price) : null,
+    maxAttendees: dto.maxAttendees ?? null,
+    currentAttendees: dto.currentAttendees ?? 0,
+    tags: [],
     status: dto.status,
-    createdAt: new Date(dto.created_at),
-    updatedAt: new Date(dto.updated_at),
-  }
-}
-
-/**
- * Map Event location DTO to domain model
- */
-export function mapEventLocationFromDto(dto: EventLocationDto): EventLocation {
-  return {
-    name: dto.name,
-    address: dto.address,
-    city: dto.city,
-    region: dto.region,
-    country: dto.country,
-    latitude: dto.latitude ?? null,
-    longitude: dto.longitude ?? null,
-  }
-}
-
-/**
- * Map Event organizer DTO to domain model
- */
-export function mapEventOrganizerFromDto(dto: EventOrganizerDto): EventOrganizer {
-  return {
-    id: dto.id,
-    name: dto.name,
-    email: dto.email,
-    phone: dto.phone ?? null,
+    createdAt: new Date(dto.createdAt),
+    updatedAt: new Date(dto.updatedAt),
   }
 }
 
@@ -58,36 +81,32 @@ export function mapEventOrganizerFromDto(dto: EventOrganizerDto): EventOrganizer
 export function mapEventAttendeeFromDto(dto: EventAttendeeDto): EventAttendee {
   return {
     id: dto.id,
-    eventId: dto.event_id,
-    userId: dto.user_id,
-    userName: dto.user_name,
-    status: dto.status,
-    registeredAt: new Date(dto.registered_at),
+    eventId: dto.eventId,
+    userId: dto.userId,
+    userName: dto.userName,
+    status: dto.status.toLowerCase() as EventAttendee['status'],
+    registeredAt: new Date(dto.registeredAt),
   }
 }
 
 /**
  * Map Event domain model to DTO for API requests
  */
-export function mapEventToDto(event: Partial<Event>): Partial<EventDto> {
+export function mapEventToDto(event: Partial<Event>): Partial<CreateEventRequestDto> {
   return {
     title: event.title,
     description: event.description,
     type: event.type,
-    start_date: event.startDate?.toISOString(),
-    end_date: event.endDate?.toISOString(),
-    location: event.location ? {
-      name: event.location.name,
-      address: event.location.address,
-      city: event.location.city,
-      region: event.location.region,
-      country: event.location.country,
-      latitude: event.location.latitude ?? undefined,
-      longitude: event.location.longitude ?? undefined,
-    } : undefined,
+    startDate: event.startDate?.toISOString(),
+    endDate: event.endDate?.toISOString(),
+    locationName: event.location?.name,
+    locationAddress: event.location?.address,
+    locationCity: event.location?.city,
+    locationRegion: event.location?.region,
+    latitude: event.location?.latitude ?? undefined,
+    longitude: event.location?.longitude ?? undefined,
     price: event.price ?? undefined,
-    max_attendees: event.maxAttendees ?? undefined,
-    tags: event.tags,
+    maxAttendees: event.maxAttendees ?? undefined,
+    imageUrl: event.imageUrl ?? undefined,
   }
 }
-

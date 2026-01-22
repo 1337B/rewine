@@ -11,8 +11,11 @@ import org.springframework.core.Ordered;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.List;
 
 
 /**
@@ -75,17 +78,44 @@ public class WebConfigImpl implements IWebConfig, WebMvcConfigurer {
         CorsConfiguration configuration = new CorsConfiguration();
 
         if (corsProperties.isEnabled()) {
-            configuration.setAllowedOrigins(corsProperties.getAllowedOrigins());
+            log.info("CORS is enabled - configuring with origins: {}", corsProperties.getAllowedOrigins());
+            // Use patterns instead of explicit origins for more flexibility
+            configuration.setAllowedOriginPatterns(corsProperties.getAllowedOrigins());
             configuration.setAllowedMethods(corsProperties.getAllowedMethods());
-            configuration.setAllowedHeaders(corsProperties.getAllowedHeaders());
+            configuration.setAllowedHeaders(List.of("*"));
             configuration.setExposedHeaders(corsProperties.getExposedHeaders());
             configuration.setAllowCredentials(corsProperties.isAllowCredentials());
             configuration.setMaxAge(corsProperties.getMaxAge());
+        } else {
+            log.warn("CORS is disabled - applying permissive defaults");
+            configuration.setAllowedOriginPatterns(List.of("*"));
+            configuration.setAllowedMethods(List.of("*"));
+            configuration.setAllowedHeaders(List.of("*"));
+            configuration.setAllowCredentials(false);
         }
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    /**
+     * CORS filter bean for explicit CORS handling.
+     * This ensures CORS headers are applied before security filters.
+     */
+    @Bean
+    public CorsFilter corsFilter() {
+        return new CorsFilter(corsConfigurationSource());
+    }
+
+    /**
+     * Register the CORS filter with highest priority to ensure it runs first.
+     */
+    @Bean
+    public FilterRegistrationBean<CorsFilter> corsFilterRegistration() {
+        FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(corsFilter());
+        bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        return bean;
     }
 
     @Bean

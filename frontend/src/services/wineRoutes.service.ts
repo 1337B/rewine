@@ -1,16 +1,19 @@
 import { wineRoutesClient } from '@api/clients/wineRoutes.client'
-import { mapWineRouteFromDto, mapWineRouteReviewFromDto, mapWineRouteToDto } from '@domain/route/route.mappers'
-import type { WineRoute, WineRouteFilter, WineRouteReview } from '@domain/route/route.types'
-import type { PaginationMeta } from '@api/api.types'
-import type { WineRouteFilterParamsDto, CreateWineRouteRequestDto, AddRouteStopRequestDto } from '@api/dto/wineRoutes.dto'
+import { mapWineRouteFromDto, mapWineRouteSummaryFromDto } from '@domain/route/route.mappers'
+import type { WineRoute, WineRouteFilter, WineRouteHierarchy } from '@domain/route/route.types'
+import type { WineRouteFilterParamsDto } from '@api/dto/wineRoutes.dto'
+
+export interface PaginationMeta {
+  pageNumber: number
+  pageSize: number
+  totalItems: number
+  totalPages: number
+  hasNext: boolean
+  hasPrevious: boolean
+}
 
 export interface WineRoutesResult {
   routes: WineRoute[]
-  pagination: PaginationMeta
-}
-
-export interface WineRouteReviewsResult {
-  reviews: WineRouteReview[]
   pagination: PaginationMeta
 }
 
@@ -19,29 +22,70 @@ export interface WineRouteReviewsResult {
  */
 export const wineRoutesService = {
   /**
+   * Get hierarchy of countries/regions/subregions
+   */
+  async getHierarchy(): Promise<WineRouteHierarchy> {
+    const response = await wineRoutesClient.getHierarchy()
+    return {
+      countries: response.countries.map(c => ({
+        name: c.name,
+        regions: c.regions.map(r => ({
+          name: r.name,
+          subregions: r.subregions,
+        })),
+      })),
+    }
+  },
+
+  /**
+   * Get list of countries
+   */
+  async getCountries(): Promise<string[]> {
+    return await wineRoutesClient.getCountries()
+  },
+
+  /**
+   * Get regions for a country
+   */
+  async getRegions(country: string): Promise<string[]> {
+    return await wineRoutesClient.getRegions(country)
+  },
+
+  /**
+   * Get subregions for a country/region
+   */
+  async getSubregions(country: string, region: string): Promise<string[]> {
+    return await wineRoutesClient.getSubregions(country, region)
+  },
+
+  /**
    * Get paginated list of wine routes
    */
-  async getWineRoutes(filter?: WineRouteFilter, page = 1, pageSize = 20): Promise<WineRoutesResult> {
+  async getWineRoutes(filter?: WineRouteFilter, page = 0, pageSize = 20): Promise<WineRoutesResult> {
     const params: WineRouteFilterParamsDto = {
       page,
-      page_size: pageSize,
+      size: pageSize,
       search: filter?.search,
+      country: filter?.country,
       region: filter?.region,
-      difficulty: filter?.difficulty,
-      min_duration: filter?.minDuration,
-      max_duration: filter?.maxDuration,
-      min_distance: filter?.minDistance,
-      max_distance: filter?.maxDistance,
-      min_rating: filter?.minRating,
-      sort_by: filter?.sortBy,
-      sort_order: filter?.sortOrder,
+      subregion: filter?.subregion,
     }
 
     const response = await wineRoutesClient.getWineRoutes(params)
 
+    // Backend returns PageResponse format with items/content arrays
+    const items = response.items ?? response.content ?? []
+
     return {
-      routes: response.data.map(mapWineRouteFromDto),
-      pagination: response.pagination,
+      routes: items.map(mapWineRouteSummaryFromDto),
+      pagination: {
+        pageNumber: response.pageNumber ?? page,
+        pageSize: response.pageSize ?? pageSize,
+        totalItems: response.totalItems ?? 0,
+        totalPages: response.totalPages ?? 0,
+        hasNext: response.hasNext ?? !response.last,
+        hasPrevious: response.hasPrevious ?? !response.first,
+      },
     }
   },
 
@@ -53,87 +97,36 @@ export const wineRoutesService = {
     return mapWineRouteFromDto(response)
   },
 
+  // ==========================================================================
+  // CRUD Operations (Admin/Partner only - to be implemented in backend)
+  // ==========================================================================
+
   /**
    * Create a new wine route
+   * Note: Backend endpoint not yet implemented
    */
-  async createWineRoute(route: Omit<WineRoute, 'id' | 'stops' | 'rating' | 'reviewCount' | 'createdAt' | 'updatedAt'>): Promise<WineRoute> {
-    const dto = mapWineRouteToDto(route) as CreateWineRouteRequestDto
-    const response = await wineRoutesClient.createWineRoute(dto)
-    return mapWineRouteFromDto(response)
+  async createWineRoute(route: Partial<WineRoute>): Promise<WineRoute> {
+    // TODO: Implement when backend supports POST /wine-routes
+    throw new Error('Wine route creation is not yet supported')
   },
 
   /**
-   * Update a wine route
+   * Update an existing wine route
+   * Note: Backend endpoint not yet implemented
    */
   async updateWineRoute(id: string, route: Partial<WineRoute>): Promise<WineRoute> {
-    const dto = mapWineRouteToDto(route) as Partial<CreateWineRouteRequestDto>
-    const response = await wineRoutesClient.updateWineRoute(id, dto)
-    return mapWineRouteFromDto(response)
+    // TODO: Implement when backend supports PUT /wine-routes/{id}
+    throw new Error('Wine route update is not yet supported')
   },
 
   /**
    * Delete a wine route
+   * Note: Backend endpoint not yet implemented
    */
   async deleteWineRoute(id: string): Promise<void> {
-    await wineRoutesClient.deleteWineRoute(id)
-  },
-
-  /**
-   * Add a stop to a wine route
-   */
-  async addRouteStop(routeId: string, stop: AddRouteStopRequestDto): Promise<WineRoute> {
-    const response = await wineRoutesClient.addRouteStop(routeId, stop)
-    return mapWineRouteFromDto(response)
-  },
-
-  /**
-   * Remove a stop from a wine route
-   */
-  async removeRouteStop(routeId: string, stopId: string): Promise<WineRoute> {
-    const response = await wineRoutesClient.removeRouteStop(routeId, stopId)
-    return mapWineRouteFromDto(response)
-  },
-
-  /**
-   * Get reviews for a wine route
-   */
-  async getRouteReviews(routeId: string, page = 1, pageSize = 10): Promise<WineRouteReviewsResult> {
-    const response = await wineRoutesClient.getRouteReviews(routeId, { page, pageSize })
-
-    return {
-      reviews: response.data.map(mapWineRouteReviewFromDto),
-      pagination: response.pagination,
-    }
-  },
-
-  /**
-   * Add a review to a wine route
-   */
-  async addReview(routeId: string, rating: number, comment: string | undefined, visitedAt: Date): Promise<WineRouteReview> {
-    const response = await wineRoutesClient.createRouteReview(routeId, {
-      rating,
-      comment,
-      visited_at: visitedAt.toISOString(),
-    })
-    return mapWineRouteReviewFromDto(response)
-  },
-
-  /**
-   * Publish a wine route
-   */
-  async publishRoute(routeId: string): Promise<WineRoute> {
-    const response = await wineRoutesClient.publishRoute(routeId)
-    return mapWineRouteFromDto(response)
-  },
-
-  /**
-   * Unpublish a wine route
-   */
-  async unpublishRoute(routeId: string): Promise<WineRoute> {
-    const response = await wineRoutesClient.unpublishRoute(routeId)
-    return mapWineRouteFromDto(response)
+    // TODO: Implement when backend supports DELETE /wine-routes/{id}
+    throw new Error('Wine route deletion is not yet supported')
   },
 }
 
 export default wineRoutesService
-

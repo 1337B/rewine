@@ -1,24 +1,58 @@
 import http from '@app/http'
 import { API_ENDPOINTS } from '@config/constants'
-import type { ApiResponse, PaginatedResponse } from '@api/api.types'
 import type {
   WineRouteDto,
-  WineRouteReviewDto,
-  CreateWineRouteRequestDto,
-  AddRouteStopRequestDto,
-  CreateWineRouteReviewRequestDto,
+  WineRouteDetailsDto,
+  WineRouteSummaryDto,
+  WineRouteHierarchyDto,
   WineRouteFilterParamsDto,
+  WineRoutesPageResponseDto,
 } from '@api/dto/wineRoutes.dto'
 
 /**
  * Wine Routes API client
+ * Note: Backend returns data directly (no wrapper).
  */
 export const wineRoutesClient = {
   /**
+   * Get hierarchy of countries/regions/subregions
+   */
+  async getHierarchy(): Promise<WineRouteHierarchyDto> {
+    const response = await http.get<WineRouteHierarchyDto>(`${API_ENDPOINTS.WINE_ROUTES}/hierarchy`)
+    return response.data
+  },
+
+  /**
+   * Get list of countries
+   */
+  async getCountries(): Promise<string[]> {
+    const response = await http.get<string[]>(`${API_ENDPOINTS.WINE_ROUTES}/countries`)
+    return response.data
+  },
+
+  /**
+   * Get regions for a country
+   */
+  async getRegions(country: string): Promise<string[]> {
+    const response = await http.get<string[]>(`${API_ENDPOINTS.WINE_ROUTES}/countries/${encodeURIComponent(country)}/regions`)
+    return response.data
+  },
+
+  /**
+   * Get subregions for a country/region
+   */
+  async getSubregions(country: string, region: string): Promise<string[]> {
+    const response = await http.get<string[]>(
+      `${API_ENDPOINTS.WINE_ROUTES}/countries/${encodeURIComponent(country)}/regions/${encodeURIComponent(region)}/subregions`
+    )
+    return response.data
+  },
+
+  /**
    * Get paginated list of wine routes
    */
-  async getWineRoutes(params?: WineRouteFilterParamsDto): Promise<PaginatedResponse<WineRouteDto>> {
-    const response = await http.get<PaginatedResponse<WineRouteDto>>(API_ENDPOINTS.WINE_ROUTES, {
+  async getWineRoutes(params?: WineRouteFilterParamsDto): Promise<WineRoutesPageResponseDto> {
+    const response = await http.get<WineRoutesPageResponseDto>(API_ENDPOINTS.WINE_ROUTES, {
       params,
     })
     return response.data
@@ -27,100 +61,10 @@ export const wineRoutesClient = {
   /**
    * Get a single wine route by ID
    */
-  async getWineRoute(id: string): Promise<WineRouteDto> {
-    const response = await http.get<ApiResponse<WineRouteDto>>(`${API_ENDPOINTS.WINE_ROUTES}/${id}`)
-    return response.data.data
-  },
-
-  /**
-   * Create a new wine route
-   */
-  async createWineRoute(data: CreateWineRouteRequestDto): Promise<WineRouteDto> {
-    const response = await http.post<ApiResponse<WineRouteDto>>(API_ENDPOINTS.WINE_ROUTES, data)
-    return response.data.data
-  },
-
-  /**
-   * Update a wine route
-   */
-  async updateWineRoute(id: string, data: Partial<CreateWineRouteRequestDto>): Promise<WineRouteDto> {
-    const response = await http.patch<ApiResponse<WineRouteDto>>(
-      `${API_ENDPOINTS.WINE_ROUTES}/${id}`,
-      data
-    )
-    return response.data.data
-  },
-
-  /**
-   * Delete a wine route
-   */
-  async deleteWineRoute(id: string): Promise<void> {
-    await http.delete(`${API_ENDPOINTS.WINE_ROUTES}/${id}`)
-  },
-
-  /**
-   * Add a stop to a wine route
-   */
-  async addRouteStop(routeId: string, data: AddRouteStopRequestDto): Promise<WineRouteDto> {
-    const response = await http.post<ApiResponse<WineRouteDto>>(
-      `${API_ENDPOINTS.WINE_ROUTES}/${routeId}/stops`,
-      data
-    )
-    return response.data.data
-  },
-
-  /**
-   * Remove a stop from a wine route
-   */
-  async removeRouteStop(routeId: string, stopId: string): Promise<WineRouteDto> {
-    const response = await http.delete<ApiResponse<WineRouteDto>>(
-      `${API_ENDPOINTS.WINE_ROUTES}/${routeId}/stops/${stopId}`
-    )
-    return response.data.data
-  },
-
-  /**
-   * Get reviews for a wine route
-   */
-  async getRouteReviews(routeId: string, params?: { page?: number; pageSize?: number }): Promise<PaginatedResponse<WineRouteReviewDto>> {
-    const response = await http.get<PaginatedResponse<WineRouteReviewDto>>(
-      `${API_ENDPOINTS.WINE_ROUTES}/${routeId}/reviews`,
-      { params }
-    )
+  async getWineRoute(id: string): Promise<WineRouteDetailsDto> {
+    const response = await http.get<WineRouteDetailsDto>(`${API_ENDPOINTS.WINE_ROUTES}/${id}`)
     return response.data
-  },
-
-  /**
-   * Create a review for a wine route
-   */
-  async createRouteReview(routeId: string, data: CreateWineRouteReviewRequestDto): Promise<WineRouteReviewDto> {
-    const response = await http.post<ApiResponse<WineRouteReviewDto>>(
-      `${API_ENDPOINTS.WINE_ROUTES}/${routeId}/reviews`,
-      data
-    )
-    return response.data.data
-  },
-
-  /**
-   * Publish a wine route
-   */
-  async publishRoute(routeId: string): Promise<WineRouteDto> {
-    const response = await http.post<ApiResponse<WineRouteDto>>(
-      `${API_ENDPOINTS.WINE_ROUTES}/${routeId}/publish`
-    )
-    return response.data.data
-  },
-
-  /**
-   * Unpublish a wine route
-   */
-  async unpublishRoute(routeId: string): Promise<WineRouteDto> {
-    const response = await http.post<ApiResponse<WineRouteDto>>(
-      `${API_ENDPOINTS.WINE_ROUTES}/${routeId}/unpublish`
-    )
-    return response.data.data
   },
 }
 
 export default wineRoutesClient
-

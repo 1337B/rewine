@@ -3,6 +3,7 @@
  *
  * Data Transfer Objects for event API endpoints.
  * These represent the exact shape of data sent to/from the backend.
+ * Note: Backend uses camelCase for all JSON fields.
  */
 
 import type { EventType, EventStatus } from '@domain/event/event.types'
@@ -12,33 +13,41 @@ import type { EventType, EventStatus } from '@domain/event/event.types'
 // ============================================================================
 
 /**
- * Event summary for list views
+ * Event summary for list views (matches backend EventSummaryResponse)
  */
 export interface EventSummaryDto {
   id: string
   title: string
   type: EventType
-  start_date: string
-  end_date: string
-  location: EventLocationDto
-  image_url?: string | null
-  price?: number | null
-  max_attendees?: number | null
-  current_attendees?: number
   status: EventStatus
+  startDate: string
+  endDate: string
+  locationName: string
+  locationCity: string
+  locationRegion?: string | null
+  latitude?: number | null
+  longitude?: number | null
+  price?: number | null
+  maxAttendees?: number | null
+  currentAttendees?: number
+  availableSpots?: number | null
+  imageUrl?: string | null
+  organizerName?: string | null
+  organizerId?: string | null
+  distanceKm?: number | null
 }
 
 /**
- * Full event details
+ * Full event details (matches backend EventDetailsResponse)
  */
 export interface EventDetailsDto extends EventSummaryDto {
   description: string
-  organizer: EventOrganizerDto
-  tags?: string[]
-  is_registered?: boolean
-  is_full?: boolean
-  created_at: string
-  updated_at: string
+  locationAddress?: string | null
+  contactEmail?: string | null
+  contactPhone?: string | null
+  websiteUrl?: string | null
+  createdAt: string
+  updatedAt: string
 }
 
 /**
@@ -46,30 +55,6 @@ export interface EventDetailsDto extends EventSummaryDto {
  * @deprecated Use EventDetailsDto for full details, EventSummaryDto for lists
  */
 export interface EventDto extends EventDetailsDto {}
-
-/**
- * Event location structure
- */
-export interface EventLocationDto {
-  name: string
-  address: string
-  city: string
-  region: string
-  country: string
-  latitude?: number | null
-  longitude?: number | null
-}
-
-/**
- * Event organizer structure
- */
-export interface EventOrganizerDto {
-  id: string
-  name: string
-  email: string
-  phone?: string | null
-  avatar?: string | null
-}
 
 // ============================================================================
 // Attendee DTOs
@@ -80,13 +65,13 @@ export interface EventOrganizerDto {
  */
 export interface EventAttendeeDto {
   id: string
-  event_id: string
-  user_id: string
-  user_name: string
-  user_avatar?: string | null
-  status: 'registered' | 'confirmed' | 'cancelled' | 'attended'
-  registered_at: string
-  confirmed_at?: string | null
+  eventId: string
+  userId: string
+  userName: string
+  userAvatar?: string | null
+  status: 'REGISTERED' | 'CONFIRMED' | 'CANCELLED' | 'ATTENDED'
+  registeredAt: string
+  confirmedAt?: string | null
 }
 
 // ============================================================================
@@ -94,22 +79,26 @@ export interface EventAttendeeDto {
 // ============================================================================
 
 /**
- * Create event request
+ * Create event request (matches backend CreateEventRequest)
  */
 export interface CreateEventRequestDto {
   title: string
   description: string
   type: EventType
-  start_date: string
-  end_date: string
-  location: Omit<EventLocationDto, 'latitude' | 'longitude'> & {
-    latitude?: number
-    longitude?: number
-  }
+  startDate: string
+  endDate: string
+  locationName: string
+  locationAddress?: string
+  locationCity: string
+  locationRegion?: string
+  latitude?: number
+  longitude?: number
   price?: number
-  max_attendees?: number
-  tags?: string[]
-  image_url?: string
+  maxAttendees?: number
+  imageUrl?: string
+  contactEmail?: string
+  contactPhone?: string
+  websiteUrl?: string
 }
 
 /**
@@ -123,7 +112,7 @@ export interface UpdateEventRequestDto extends Partial<CreateEventRequestDto> {
  * Event registration request
  */
 export interface RegisterEventRequestDto {
-  event_id: string
+  eventId: string
   notes?: string
 }
 
@@ -132,23 +121,22 @@ export interface RegisterEventRequestDto {
  */
 export interface EventFilterParamsDto {
   search?: string
-  type?: string | string[]
+  type?: EventType
   city?: string
   region?: string
   country?: string
-  start_date?: string
-  end_date?: string
-  min_price?: number
-  max_price?: number
-  status?: EventStatus | EventStatus[]
-  has_availability?: boolean
+  startDate?: string
+  endDate?: string
+  minPrice?: number
+  maxPrice?: number
+  status?: EventStatus
   latitude?: number
   longitude?: number
-  radius_km?: number
-  sort_by?: 'date' | 'price' | 'popularity' | 'distance' | 'created_at'
-  sort_order?: 'asc' | 'desc'
+  radiusKm?: number
+  sortBy?: 'startDate' | 'price' | 'distance' | 'createdAt'
+  sortDirection?: 'ASC' | 'DESC'
   page?: number
-  page_size?: number
+  size?: number
 }
 
 // ============================================================================
@@ -156,23 +144,17 @@ export interface EventFilterParamsDto {
 // ============================================================================
 
 /**
- * Paginated events response
+ * Paginated events response (matches backend PageResponse)
  */
 export interface EventsPageResponseDto {
-  data: EventSummaryDto[]
-  pagination: {
-    page: number
-    page_size: number
-    total_items: number
-    total_pages: number
-    has_next: boolean
-    has_previous: boolean
-  }
-}
-
-/**
- * Nearby events response with distance
- */
-export interface NearbyEventDto extends EventSummaryDto {
-  distance_km: number
+  items: EventSummaryDto[]
+  content: EventSummaryDto[]  // Legacy alias
+  pageNumber: number
+  pageSize: number
+  totalItems: number
+  totalPages: number
+  first: boolean
+  last: boolean
+  hasNext: boolean
+  hasPrevious: boolean
 }

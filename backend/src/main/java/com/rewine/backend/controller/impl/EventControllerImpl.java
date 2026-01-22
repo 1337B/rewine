@@ -13,8 +13,6 @@ import com.rewine.backend.model.enums.EventType;
 import com.rewine.backend.service.IEventService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
@@ -73,12 +71,12 @@ public class EventControllerImpl implements IEventController {
     @Override
     @GetMapping
     public ResponseEntity<PageResponse<EventSummaryResponse>> listEvents(
-            @RequestParam(required = false) EventType type,
-            @RequestParam(required = false) String city,
-            @RequestParam(required = false) String region,
-            @RequestParam(required = false) String search,
-            @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
+            EventType type,
+            String city,
+            String region,
+            String search,
+            int page,
+            int size) {
 
         LOGGER.info("GET /events - type={}, city={}, region={}, search={}, page={}, size={}",
                 type, city, region, search, page, size);
@@ -96,11 +94,11 @@ public class EventControllerImpl implements IEventController {
     @Override
     @GetMapping("/nearby")
     public ResponseEntity<PageResponse<EventSummaryResponse>> listNearbyEvents(
-            @RequestParam BigDecimal latitude,
-            @RequestParam BigDecimal longitude,
-            @RequestParam(required = false) Double radiusKm,
-            @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
+            BigDecimal latitude,
+            BigDecimal longitude,
+            Double radiusKm,
+            int page,
+            int size) {
 
         LOGGER.info("GET /events/nearby - lat={}, lng={}, radius={}, page={}, size={}",
                 latitude, longitude, radiusKm, page, size);
@@ -139,8 +137,7 @@ public class EventControllerImpl implements IEventController {
     @Override
     @PostMapping
     @PreAuthorize("hasAnyRole('PARTNER', 'ADMIN')")
-    public ResponseEntity<EventDetailsResponse> createEvent(
-            @Valid @RequestBody CreateEventRequest request) {
+    public ResponseEntity<EventDetailsResponse> createEvent(CreateEventRequest request) {
 
         LOGGER.info("POST /events - Creating event: {}", request.getTitle());
 
@@ -195,8 +192,8 @@ public class EventControllerImpl implements IEventController {
     @GetMapping("/my-events")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PageResponse<EventSummaryResponse>> listMyEvents(
-            @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
 
         LOGGER.info("GET /events/my-events - page={}, size={}", page, size);
 

@@ -22,7 +22,7 @@ export const useEventsStore = defineStore('events', () => {
   )
 
   // Actions
-  async function fetchEvents(page = 1, pageSize = 20) {
+  async function fetchEvents(page = 0, pageSize = 20) {
     loading.value = true
     error.value = null
 
@@ -57,10 +57,16 @@ export const useEventsStore = defineStore('events', () => {
     error.value = null
 
     try {
-      nearbyEvents.value = await eventsService.getNearbyEvents(latitude, longitude, radiusKm)
+      const result = await eventsService.getNearbyEvents(latitude, longitude, radiusKm)
+      nearbyEvents.value = result.events
+      // If no nearby events found, fallback to fetching all events
+      if (result.events.length === 0) {
+        await fetchEvents()
+      }
     } catch (err: unknown) {
       error.value = err instanceof Error ? err.message : 'Failed to fetch nearby events'
-      throw err
+      // Fallback to regular events on error
+      await fetchEvents()
     } finally {
       loading.value = false
     }

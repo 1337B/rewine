@@ -21,7 +21,7 @@ export const useWineRoutesStore = defineStore('wineRoutes', () => {
   )
 
   // Actions
-  async function fetchRoutes(page = 1, pageSize = 20) {
+  async function fetchRoutes(page = 0, pageSize = 20) {
     loading.value = true
     error.value = null
 
