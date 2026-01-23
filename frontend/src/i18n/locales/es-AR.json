@@ -176,6 +176,16 @@
     },
     "noRoutes": "No se encontraron rutas"
   },
+  "wineDetails": {
+    "alcohol": "Alcohol",
+    "aiSommelier": "Sommelier IA",
+    "consultAi": "Consultá a nuestra IA sobre este vino",
+    "profileGenerated": "Perfil generado por IA disponible",
+    "generateProfile": "Generar Perfil",
+    "viewProfile": "Ver Perfil",
+    "addToCellar": "Agregar a Bodega",
+    "notFound": "Vino no encontrado"
+  },
   "errors": {
     "generic": "Algo salió mal",
     "notFound": "Página no encontrada",

@@ -176,6 +176,16 @@
     },
     "noRoutes": "No routes found"
   },
+  "wineDetails": {
+    "alcohol": "Alcohol",
+    "aiSommelier": "AI Sommelier",
+    "consultAi": "Ask our AI about this wine",
+    "profileGenerated": "AI-generated profile available",
+    "generateProfile": "Generate Profile",
+    "viewProfile": "View Profile",
+    "addToCellar": "Add to Cellar",
+    "notFound": "Wine not found"
+  },
   "errors": {
     "generic": "Something went wrong",
     "notFound": "Page not found",
